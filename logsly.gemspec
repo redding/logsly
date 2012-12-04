@@ -4,18 +4,21 @@ require File.expand_path('../lib/logsly/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.name        = "logsly"
   gem.version     = Logsly::VERSION
-  gem.description = %q{TODO: Write a gem description}
-  gem.summary     = %q{TODO: Write a gem summary}
+  gem.description = %q{A logging library - yes, another one.}
+  gem.summary     = %q{A logging library - yes, another one.}
 
-  gem.authors     = ["TODO: authors"]
-  gem.email       = ["TODO: emails"]
-  gem.homepage    = "http://github.com/__/logsly"
+  gem.authors     = ["Kelly Redding", "Collin Redding"]
+  gem.email       = ["kelly@kellyredding.com", "collin.redding@me.com"]
+  gem.homepage    = "http://github.com/redding/logsly"
 
   gem.files         = `git ls-files`.split("\n")
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.require_paths = ["lib"]
 
-  gem.add_development_dependency("assert")
-  # gem.add_dependency("gem-name", ["~> 0.0"])
+  gem.add_development_dependency("assert", ["~> 1.0"])
+
+  gem.add_dependency("ns-options",  ["~>1.0"])
+  gem.add_dependency("logging",     ["~>1.8.0"])
+
 end
