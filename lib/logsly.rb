@@ -1,0 +1,3 @@
+module Logsly
+
+end
