@@ -1,5 +1,7 @@
+require 'logsly/base_output'
+
 module Logsly
-  class FileOutput < Struct.new(:build)
+  class FileOutput < BaseOutput
 
   end
 end

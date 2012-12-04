@@ -1,5 +1,7 @@
+require 'logsly/base_output'
+
 module Logsly
-  class SyslogOutput < Struct.new(:build)
+  class SyslogOutput < BaseOutput
 
   end
 end
