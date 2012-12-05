@@ -1,4 +1,5 @@
 require 'ns-options'
+require 'logging'
 
 module Logsly
   class BaseOutput
@@ -15,6 +16,13 @@ module Logsly
 
     def run_build
       self.instance_eval &@build
+    end
+
+    def to_layout
+      Logging.layouts.pattern({
+        :pattern      => self.pattern,
+        :color_scheme => self.colors
+      })
     end
 
   end

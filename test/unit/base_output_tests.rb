@@ -1,4 +1,5 @@
 require 'assert'
+require 'logging'
 require 'logsly/base_output'
 
 class Logsly::BaseOutput
@@ -10,7 +11,7 @@ class Logsly::BaseOutput
     end
     subject { @out }
 
-    should have_imeths :build, :pattern, :colors, :run_build
+    should have_imeths :build, :pattern, :colors, :run_build, :to_layout
 
     should "know its build" do
       build_proc = Proc.new {}
@@ -19,19 +20,37 @@ class Logsly::BaseOutput
       assert_same build_proc, out.build
     end
 
-    should "instance eval its build" do
-      out = Logsly::BaseOutput.new do
-        pattern 'abcd'
+  end
+
+  class BuildTests < BaseTests
+    desc "given a build"
+    setup do
+      Logging.color_scheme('a_color_scheme', {
+        :debug => :white
+      })
+      @out = Logsly::BaseOutput.new do
+        pattern '%m\n'
         colors  'a_color_scheme'
       end
+    end
 
-      assert_nil out.pattern
-      assert_nil out.colors
+    should "instance eval its build" do
+      assert_nil subject.pattern
+      assert_nil subject.colors
 
-      out.run_build
+      subject.run_build
 
-      assert_equal 'abcd', out.pattern
-      assert_equal 'a_color_scheme', out.colors
+      assert_equal '%m\n', subject.pattern
+      assert_equal 'a_color_scheme', subject.colors
+    end
+
+    should "build a Logging pattern layout" do
+      subject.run_build
+      lay = subject.to_layout
+
+      assert_kind_of Logging::Layout, lay
+      assert_equal '%m\n', lay.pattern
+      assert_kind_of Logging::ColorScheme, lay.color_scheme
     end
 
   end
