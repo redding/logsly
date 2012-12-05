@@ -14,7 +14,7 @@ class Logsly::FileOutput
       assert_kind_of Logsly::BaseOutput, subject
     end
 
-    should "build a file Logging appender"
+    should "build a Logging file appender"
   end
 
 end

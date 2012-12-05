@@ -14,7 +14,7 @@ class Logsly::SyslogOutput
       assert_kind_of Logsly::BaseOutput, subject
     end
 
-    should "build a syslog Logging appender"
+    should "build a Logging syslog appender"
   end
 
 end
