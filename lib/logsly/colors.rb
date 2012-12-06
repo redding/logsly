@@ -53,9 +53,9 @@ module Logsly
       @line_settings  = []
     end
 
-    def run_build
+    def run_build(*args)
       if !@been_built
-        self.instance_eval &@build
+        self.instance_exec(*args, &@build)
 
         @properties     = properties.map{|p| self.send(p)}
         @method         = self.method_name

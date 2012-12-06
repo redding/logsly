@@ -7,7 +7,9 @@ class Logsly::Colors
   class BaseTests < Assert::Context
     desc "the Colors handler"
     setup do
-      @colors = Logsly::Colors.new('test_colors') {}
+      @colors = Logsly::Colors.new('test_colors') do |*args|
+        debug args.first
+      end
     end
     subject { @colors }
 
@@ -27,6 +29,12 @@ class Logsly::Colors
       out = Logsly::Colors.new 'test', &build_proc
 
       assert_same build_proc, out.build
+    end
+
+    should "instance exec its build with args" do
+      assert_nil subject.debug
+      subject.run_build :white
+      assert_equal :white, subject.debug
     end
 
     should "know if its been built" do
