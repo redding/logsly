@@ -6,7 +6,7 @@ module Logsly
   class BaseOutput
     include NsOptions::Proxy
 
-    option :pattern, String
+    option :pattern, String, :default => '%m\n'
     option :colors,  String
 
     attr_reader :build
@@ -15,8 +15,13 @@ module Logsly
       @build = build
     end
 
-    def run_build
-      self.instance_eval &@build
+    def run_build(*args)
+      self.instance_exec(*args, &@build)
+      self.colors_obj.run_build(*args)
+    end
+
+    def to_appender
+      raise NotImplementedError
     end
 
     def to_layout
@@ -35,7 +40,7 @@ module Logsly
     end
 
     def colors_obj
-      Logsly.colors(self.colors).run_build
+      Logsly.colors(self.colors)
     end
 
   end

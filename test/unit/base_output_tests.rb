@@ -11,8 +11,9 @@ class Logsly::BaseOutput
     end
     subject { @out }
 
-    should have_imeths :build, :pattern, :colors, :colors_obj, :color_scheme
-    should have_imeths :run_build, :to_layout, :to_pattern_opts
+    should have_reader :build
+    should have_imeths :pattern, :colors, :colors_obj, :color_scheme
+    should have_imeths :run_build, :to_layout, :to_pattern_opts, :to_appender
 
     should "know its build" do
       build_proc = Proc.new {}
@@ -21,8 +22,18 @@ class Logsly::BaseOutput
       assert_same build_proc, out.build
     end
 
+    should "know its default pattern" do
+      assert_equal '%m\n', subject.pattern
+    end
+
     should "know its default color scheme" do
       assert_nil subject.color_scheme
+    end
+
+    should "expect `to_appender` to be defined by subclasses" do
+      assert_raises NotImplementedError do
+        subject.to_appender
+      end
     end
 
   end
@@ -33,19 +44,19 @@ class Logsly::BaseOutput
       Logsly.colors('a_color_scheme') do
         debug :white
       end
-      @out = Logsly::BaseOutput.new do
-        pattern '%m\n'
+      @out = Logsly::BaseOutput.new do |*args|
+        pattern args.to_s
         colors  'a_color_scheme'
       end
     end
 
-    should "instance eval its build" do
-      assert_nil subject.pattern
+    should "instance exec its build with args" do
+      assert_equal '%m\n', subject.pattern
       assert_nil subject.colors
 
-      subject.run_build
+      subject.run_build '%d : %m\n'
 
-      assert_equal '%m\n', subject.pattern
+      assert_equal '%d : %m\n', subject.pattern
       assert_equal 'a_color_scheme', subject.colors
     end
 
@@ -64,7 +75,7 @@ class Logsly::BaseOutput
     end
 
     should "know its layout pattern opts hash" do
-      subject.run_build
+      subject.run_build '%d : %m\n'
       expected = {
         :pattern      => subject.pattern,
         :color_scheme => subject.color_scheme
@@ -75,16 +86,16 @@ class Logsly::BaseOutput
         pattern '%m\n'
       end
       out.run_build
-      out_expected = {:pattern => subject.pattern}
+      out_expected = {:pattern => out.pattern}
       assert_equal out_expected, out.to_pattern_opts
     end
 
     should "build a Logging pattern layout" do
-      subject.run_build
+      subject.run_build '%d : %m\n'
       lay = subject.to_layout
 
       assert_kind_of Logging::Layout, lay
-      assert_equal   '%m\n', lay.pattern
+      assert_equal   '%d : %m\n', lay.pattern
       assert_kind_of Logging::ColorScheme, lay.color_scheme
     end
 
