@@ -1,5 +1,6 @@
 require 'ns-options'
 require 'logging'
+require 'logsly/settings'
 
 module Logsly
   class BaseOutput
@@ -19,10 +20,22 @@ module Logsly
     end
 
     def to_layout
-      Logging.layouts.pattern({
-        :pattern      => self.pattern,
-        :color_scheme => self.colors
-      })
+      Logging.layouts.pattern(self.to_pattern_opts)
+    end
+
+    def to_pattern_opts
+      Hash.new.tap do |opts|
+        opts[:pattern]      = self.pattern      if self.pattern
+        opts[:color_scheme] = self.color_scheme if self.color_scheme
+      end
+    end
+
+    def color_scheme
+      colors_obj.name
+    end
+
+    def colors_obj
+      Logsly.colors(self.colors).run_build
     end
 
   end
