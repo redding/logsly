@@ -12,11 +12,14 @@ module Logsly
 
     should have_imeths :colors, :stdout, :file, :syslog, :outputs
 
+    should "return a NullColors obj when requesting a colors that isn't defined" do
+      assert_kind_of NullColors, Logsly.colors('not_defined_yet')
+    end
+
     should "add a named color scheme using the `colors` method" do
-      assert_nil Logsly.colors('test_colors')
+      assert_kind_of NullColors, Logsly.colors('test_colors')
       subject.colors('test_colors') {}
 
-      assert_not_nil Logsly.colors('test_colors')
       assert_kind_of Colors, Logsly.colors('test_colors')
     end
 

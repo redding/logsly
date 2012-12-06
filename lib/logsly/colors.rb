@@ -1,3 +1,4 @@
+require 'ostruct'
 require 'ns-options'
 
 # This class provides a DSL for setting color scheme values and lazy eval's
@@ -6,6 +7,13 @@ require 'ns-options'
 # for details on Logging color schemes.
 
 module Logsly
+
+  class NullColors < OpenStruct
+    def initialize(&build); super(); end
+    def run_build; self; end
+    def to_scheme; nil;  end
+  end
+
   class Colors
     include NsOptions::Proxy
 
@@ -34,10 +42,11 @@ module Logsly
     option :line        # [%L] line number where the logging request was issued
     option :method_name # [%M] method name where the logging request was issued
 
-    attr_reader :build
+    attr_reader :name, :build, :been_built, :scheme
 
-    def initialize(&build)
-      @build = build
+    def initialize(name, &build)
+      @name, @build, @been_built, @scheme = name, build, false, nil
+
       @properties     = []
       @method         = nil
       @level_settings = []
@@ -45,20 +54,23 @@ module Logsly
     end
 
     def run_build
-      self.instance_eval &@build
+      if !@been_built
+        self.instance_eval &@build
 
-      @properties     = properties.map{|p| self.send(p)}
-      @method         = self.method_name
-      @level_settings = levels.map{|l| self.send(l)}
-      @line_settings  = levels.map{|l| self.send("#{l}_line")}
+        @properties     = properties.map{|p| self.send(p)}
+        @method         = self.method_name
+        @level_settings = levels.map{|l| self.send(l)}
+        @line_settings  = levels.map{|l| self.send("#{l}_line")}
+
+        @been_built = true
+      end
 
       if has_level_settings? && has_line_settings?
         raise ArgumentError, "can't set line and level settings in the same scheme"
       end
-    end
 
-    def to_scheme
-      @scheme ||= Logging.color_scheme(self.object_id, self.to_scheme_opts)
+      @scheme ||= Logging.color_scheme(@name, self.to_scheme_opts)
+      self
     end
 
     def to_scheme_opts
