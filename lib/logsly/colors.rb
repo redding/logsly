@@ -32,16 +32,74 @@ module Logsly
     option :thread_id   # [%t] object_id of the thread
     option :file        # [%F] filename where the logging request was issued
     option :line        # [%L] line number where the logging request was issued
-    option :method      # [%M] method name where the logging request was issued
+    option :method_name # [%M] method name where the logging request was issued
 
     attr_reader :build
 
     def initialize(&build)
       @build = build
+      @properties     = []
+      @method         = nil
+      @level_settings = []
+      @line_settings  = []
     end
 
     def run_build
       self.instance_eval &@build
+
+      @properties     = properties.map{|p| self.send(p)}
+      @method         = self.method_name
+      @level_settings = levels.map{|l| self.send(l)}
+      @line_settings  = levels.map{|l| self.send("#{l}_line")}
+
+      if has_level_settings? && has_line_settings?
+        raise ArgumentError, "can't set line and level settings in the same scheme"
+      end
+    end
+
+    def to_scheme
+      @scheme ||= Logging.color_scheme(self.object_id, self.to_scheme_opts)
+    end
+
+    def to_scheme_opts
+      Hash.new.tap do |opts|
+        # set general properties
+        properties.each_with_index do |property, idx|
+          opts[property] = @properties[idx] if @properties[idx]
+        end
+
+        # set special properties (reserved names)
+        opts[:method] = @method if @method
+
+        # set level settings - only add :levels key if one exists
+        if has_level_settings?
+          opts[:levels] = {}
+          levels.each_with_index do |level, idx|
+            opts[:levels][level] = @level_settings[idx] if @level_settings[idx]
+          end
+        end
+
+        # set line-level settings - only :lines key if one exists
+        if has_line_settings?
+          opts[:lines] = {}
+          levels.each_with_index do |level, idx|
+            opts[:lines][level] = @line_settings[idx] if @line_settings[idx]
+          end
+        end
+      end
+    end
+
+    private
+
+    def has_level_settings?; !@level_settings.compact.empty?; end
+    def has_line_settings?;  !@line_settings.compact.empty?;  end
+
+    def properties
+      [:logger, :date, :message, :time, :pid, :thread, :thread_id, :file, :line]
+    end
+
+    def levels
+      [:debug, :info, :warn, :error, :fatal]
     end
 
   end
