@@ -67,8 +67,9 @@ Define a named file output to use with your loggers.  Takes the same parameters 
 
 ```ruby
 Logsly.syslog('my_syslog') do |logger|
-  identity "my_syslog_logger"  # or whatever
-  facility Syslog::LOG_LOCAL0  # or whatever
+  identity "my_syslog_logger" # or whatever
+  facility Syslog::LOG_LOCAL0 # or whatever (default: `LOG_LOCAL0`)
+  log_opts Syslog::LOG_PID    # or whatever (default: `(LOG_PID | LOG_CONS)`)
 
   pattern '%m\n'
   # don't use a color scheme

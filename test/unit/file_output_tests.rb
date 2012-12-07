@@ -32,7 +32,7 @@ class Logsly::FileOutput
       assert_kind_of Logsly::BaseOutput, subject
     end
 
-    should "build a Logging stdout appender, passing args to the builds" do
+    should "build a Logging file appender, passing args to the builds" do
       subject.run_build @logger
 
       assert_kind_of Logging::Appenders::File, subject.to_appender
