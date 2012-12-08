@@ -16,6 +16,10 @@ module Logsly
       assert_kind_of NullColors, Logsly.colors('not_defined_yet')
     end
 
+    should "return a NullOutput obj when requesting an output that isn't defined" do
+      assert_kind_of NullOutput, Logsly.outputs('not_defined_yet')
+    end
+
     should "add a named color scheme using the `colors` method" do
       assert_kind_of NullColors, Logsly.colors('test_colors')
       Logsly.colors('test_colors') {}
@@ -24,7 +28,7 @@ module Logsly
     end
 
     should "add a named stdout output using the `stdout` method" do
-      assert_nil Logsly.outputs('test_stdout')
+      assert_kind_of NullOutput, Logsly.outputs('test_stdout')
       Logsly.stdout('test_stdout') {}
 
       assert_not_nil Logsly.outputs('test_stdout')
@@ -32,7 +36,7 @@ module Logsly
     end
 
     should "add a named file output using the `file` method" do
-      assert_nil Logsly.outputs('test_file')
+      assert_kind_of NullOutput, Logsly.outputs('test_file')
       Logsly.file('test_file') {}
 
       assert_not_nil Logsly.outputs('test_file')
@@ -40,7 +44,7 @@ module Logsly
     end
 
     should "add a named syslog output using the `syslog` method" do
-      assert_nil Logsly.outputs('test_syslog')
+      assert_kind_of NullOutput, Logsly.outputs('test_syslog')
       Logsly.syslog('test_syslog') {}
 
       assert_not_nil Logsly.outputs('test_syslog')
@@ -86,7 +90,7 @@ module Logsly
       Logsly.reset
 
       assert_kind_of NullColors, Logsly.colors('test_colors')
-      assert_nil     Logsly.outputs('test_stdout')
+      assert_kind_of NullOutput, Logsly.outputs('test_stdout')
     end
 
   end

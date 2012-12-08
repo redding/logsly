@@ -1,5 +1,6 @@
 require 'ns-options'
 require 'logsly/colors'
+require 'logsly/base_output'
 
 module Logsly
 
@@ -7,7 +8,7 @@ module Logsly
     include NsOptions::Proxy
 
     option :colors,  ::Hash, :default => ::Hash.new(NullColors.new)
-    option :outputs, ::Hash, :default => {}
+    option :outputs, ::Hash, :default => ::Hash.new(NullOutput.new)
   end
 
   def self.reset

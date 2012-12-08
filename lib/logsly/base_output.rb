@@ -1,8 +1,14 @@
+require 'ostruct'
 require 'ns-options'
 require 'logging'
-require 'logsly/settings'
 
 module Logsly
+
+  class NullOutput < OpenStruct
+    def initialize(&build); super(); end
+    def to_appender; nil; end
+  end
+
   class BaseOutput
     include NsOptions::Proxy
 
