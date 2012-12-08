@@ -42,10 +42,10 @@ module Logsly
     option :line        # [%L] line number where the logging request was issued
     option :method_name # [%M] method name where the logging request was issued
 
-    attr_reader :name, :build, :been_built, :scheme
+    attr_reader :name, :build, :scheme
 
     def initialize(name, &build)
-      @name, @build, @been_built, @scheme = name, build, false, nil
+      @name, @build, @scheme = name, build, nil
 
       @properties     = []
       @method         = nil
@@ -54,22 +54,18 @@ module Logsly
     end
 
     def run_build(*args)
-      if !@been_built
-        self.instance_exec(*args, &@build)
+      self.instance_exec(*args, &@build)
 
-        @properties     = properties.map{|p| self.send(p)}
-        @method         = self.method_name
-        @level_settings = levels.map{|l| self.send(l)}
-        @line_settings  = levels.map{|l| self.send("#{l}_line")}
-
-        @been_built = true
-      end
+      @properties     = properties.map{|p| self.send(p)}
+      @method         = self.method_name
+      @level_settings = levels.map{|l| self.send(l)}
+      @line_settings  = levels.map{|l| self.send("#{l}_line")}
 
       if has_level_settings? && has_line_settings?
         raise ArgumentError, "can't set line and level settings in the same scheme"
       end
 
-      @scheme ||= Logging.color_scheme(@name, self.to_scheme_opts)
+      @scheme = Logging.color_scheme(@name, self.to_scheme_opts)
       self
     end
 

@@ -13,7 +13,7 @@ class Logsly::Colors
     end
     subject { @colors }
 
-    should have_readers :name, :build, :been_built, :scheme
+    should have_readers :name, :build, :scheme
     should have_imeths :run_build, :to_scheme_opts
     should have_imeths :debug, :info, :warn, :error, :fatal
     should have_imeths :debug_line, :info_line, :warn_line, :error_line, :fatal_line
@@ -35,12 +35,6 @@ class Logsly::Colors
       assert_nil subject.debug
       subject.run_build :white
       assert_equal :white, subject.debug
-    end
-
-    should "know if its been built" do
-      assert_not subject.been_built
-      subject.run_build
-      assert     subject.been_built
     end
 
     should "return itself when `run_build` is called" do
