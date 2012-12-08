@@ -60,6 +60,10 @@ class Logsly::BaseOutput
       assert_equal 'a_color_scheme', subject.colors
     end
 
+    should "return itself when `run_build` is called" do
+      assert_equal subject, subject.run_build
+    end
+
     should "know and run the build on its colors obj" do
       subject.run_build
 

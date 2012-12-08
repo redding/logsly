@@ -24,6 +24,7 @@ module Logsly
     def run_build(*args)
       self.instance_exec(*args, &@build)
       self.colors_obj.run_build(*args)
+      self
     end
 
     def to_appender
