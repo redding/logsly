@@ -10,6 +10,10 @@ module Logsly
     option :outputs, ::Hash, :default => {}
   end
 
+  def self.reset
+    Settings.reset
+  end
+
   def self.colors(name, &block)
     require 'logsly/colors'
     Settings.colors[name.to_s] = Colors.new(name, &block) if !block.nil?
