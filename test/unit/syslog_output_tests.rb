@@ -2,9 +2,29 @@ require 'assert'
 require 'ostruct'
 require 'syslog'
 require 'logging'
+require 'logsly/settings'
 require 'logsly/syslog_output'
 
 class Logsly::SyslogOutput
+
+  class DataTests < Assert::Context
+    desc "the FileOutputData handler"
+    setup do
+      @data = Logsly::SyslogOutputData.new {}
+    end
+    subject { @data }
+
+    should have_imeth :identity, :log_opts, :facility
+
+    should "default :log_opts" do
+      assert_equal (Syslog::LOG_PID | Syslog::LOG_CONS), subject.log_opts
+    end
+
+    should "default :facility" do
+      assert_equal Syslog::LOG_LOCAL0, subject.facility
+    end
+
+  end
 
   class BaseTests < Assert::Context
     desc "the SyslogOutput handler"
@@ -29,27 +49,17 @@ class Logsly::SyslogOutput
     end
     subject { @out }
 
-    should have_imeth :identity, :log_opts, :facility
-
     should "be an output handler" do
       assert_kind_of Logsly::BaseOutput, subject
     end
 
-    should "default :log_opts" do
-      assert_equal (Syslog::LOG_PID | Syslog::LOG_CONS), subject.log_opts
-    end
-
-    should "default :facility" do
-      assert_equal Syslog::LOG_LOCAL0, subject.facility
-    end
-
     should "build a Logging syslog appender, passing args to the builds" do
-      subject.run_build @logger
+      appender = subject.to_appender @logger
 
-      assert_kind_of Logging::Appenders::Syslog, subject.to_appender
-      assert_kind_of Logging::Layouts::Pattern, subject.to_appender.layout
-      assert_equal   '%d : %m\n', subject.to_appender.layout.pattern
-      assert_kind_of Logging::ColorScheme, subject.to_appender.layout.color_scheme
+      assert_kind_of Logging::Appenders::Syslog, appender
+      assert_kind_of Logging::Layouts::Pattern,  appender.layout
+      assert_equal   '%d : %m\n',                appender.layout.pattern
+      assert_kind_of Logging::ColorScheme,       appender.layout.color_scheme
     end
   end
 

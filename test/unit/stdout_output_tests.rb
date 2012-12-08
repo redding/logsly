@@ -1,6 +1,7 @@
 require 'assert'
 require 'ostruct'
 require 'logging'
+require 'logsly/settings'
 require 'logsly/stdout_output'
 
 class Logsly::StdoutOutput
@@ -28,12 +29,12 @@ class Logsly::StdoutOutput
     end
 
     should "build a Logging stdout appender, passing args to the builds" do
-      subject.run_build @logger
+      appender = subject.to_appender @logger
 
-      assert_kind_of Logging::Appenders::Stdout, subject.to_appender
-      assert_kind_of Logging::Layouts::Pattern, subject.to_appender.layout
-      assert_equal   '%d : %m\n', subject.to_appender.layout.pattern
-      assert_kind_of Logging::ColorScheme, subject.to_appender.layout.color_scheme
+      assert_kind_of Logging::Appenders::Stdout, appender
+      assert_kind_of Logging::Layouts::Pattern,  appender.layout
+      assert_equal   '%d : %m\n',                appender.layout.pattern
+      assert_kind_of Logging::ColorScheme,       appender.layout.color_scheme
     end
   end
 
