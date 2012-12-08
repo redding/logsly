@@ -9,12 +9,26 @@ require 'ns-options'
 module Logsly
 
   class NullColors < OpenStruct
-    def initialize(&build); super(); end
-    def run_build; self; end
-    def to_scheme; nil;  end
+    def to_scheme(*args); nil;  end
   end
 
   class Colors
+
+    attr_reader :name, :build
+
+    def initialize(name, &build)
+      @name, @build = name, build
+    end
+
+    def to_scheme(*args)
+      "#{@name}-#{args.map{|a| a.object_id}.join('-')}".tap do |scheme_name|
+        Logging.color_scheme(scheme_name, ColorsData.new(*args, &@build).to_scheme_opts)
+      end
+    end
+
+  end
+
+  class ColorsData
     include NsOptions::Proxy
 
     # color for the level text only
@@ -42,19 +56,8 @@ module Logsly
     option :line        # [%L] line number where the logging request was issued
     option :method_name # [%M] method name where the logging request was issued
 
-    attr_reader :name, :build, :scheme
-
-    def initialize(name, &build)
-      @name, @build, @scheme = name, build, nil
-
-      @properties     = []
-      @method         = nil
-      @level_settings = []
-      @line_settings  = []
-    end
-
-    def run_build(*args)
-      self.instance_exec(*args, &@build)
+    def initialize(*args, &build)
+      self.instance_exec(*args, &build)
 
       @properties     = properties.map{|p| self.send(p)}
       @method         = self.method_name
@@ -64,9 +67,6 @@ module Logsly
       if has_level_settings? && has_line_settings?
         raise ArgumentError, "can't set line and level settings in the same scheme"
       end
-
-      @scheme = Logging.color_scheme(@name, self.to_scheme_opts)
-      self
     end
 
     def to_scheme_opts
@@ -111,4 +111,5 @@ module Logsly
     end
 
   end
+
 end
