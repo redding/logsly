@@ -1,4 +1,5 @@
 require 'ns-options'
+require 'logging'
 require 'logsly/colors'
 require 'logsly/base_output'
 
@@ -13,6 +14,7 @@ module Logsly
 
   def self.reset
     Settings.reset
+    Logging.reset
   end
 
   def self.colors(name, &block)

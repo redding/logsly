@@ -14,7 +14,7 @@ module Logsly
     attr_reader :build
 
     def initialize(&build)
-      @build = build
+      @build = build || Proc.new {}
     end
 
     def to_appender(*args)
