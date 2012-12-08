@@ -5,15 +5,11 @@ require 'logging'
 module Logsly
 
   class NullOutput < OpenStruct
-    def initialize(&build); super(); end
-    def to_appender; nil; end
+    def to_appender(*args); nil; end
+    def to_layout(*args);   nil; end
   end
 
   class BaseOutput
-    include NsOptions::Proxy
-
-    option :pattern, String, :default => '%m\n'
-    option :colors,  String
 
     attr_reader :build
 
@@ -21,34 +17,48 @@ module Logsly
       @build = build
     end
 
-    def run_build(*args)
+    def to_appender(*args)
       self.instance_exec(*args, &@build)
       self.colors_obj.run_build(*args)
       self
     end
 
-    def to_appender
+    def to_layout(data)
+      Logging.layouts.pattern(data.to_pattern_opts)
+    end
+
+    def to_appender(*args)
       raise NotImplementedError
     end
 
-    def to_layout
-      Logging.layouts.pattern(self.to_pattern_opts)
+  end
+
+  class BaseOutputData
+    include NsOptions::Proxy
+    option :pattern, String, :default => '%m\n'
+    option :colors,  String
+
+    def initialize(*args, &build)
+      @args = args
+      self.instance_exec(*@args, &build)
     end
 
     def to_pattern_opts
       Hash.new.tap do |opts|
-        opts[:pattern]      = self.pattern      if self.pattern
-        opts[:color_scheme] = self.color_scheme if self.color_scheme
+        opts[:pattern] = self.pattern if self.pattern
+
+        if scheme_name = colors_obj.to_scheme(*@args)
+          opts[:color_scheme] = scheme_name
+        end
       end
     end
 
-    def color_scheme
-      colors_obj.name
-    end
+    protected
 
     def colors_obj
       Logsly.colors(self.colors)
     end
 
   end
+
 end
