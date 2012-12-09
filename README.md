@@ -1,6 +1,6 @@
 # Logsly
 
-An opinionated logging mixin.
+Logsly is a DSL and a mixin to setup and create custom logger objects.  Define your color schemes and log outputs.  Then mixin Logsly to make your logger classes.  Create instances of your loggers specifying outputs for each, then use your loggers to log stuff to those outputs.
 
 ## Usage
 
@@ -9,17 +9,13 @@ An opinionated logging mixin.
 # define a named output for your logger to use
 Logsly.stdout('my_stdout')
 
-# define your a logger
-
+# define your logger
 class MyLogger
   include Logsly
 end
 
 # build a logger instance with a name and use it
-
 logger = MyLogger.new(:outputs => ['my_stdout'])
-logger.level = 'debug'
-
 logger.info "whatever"
 
 # build another logger and use it
@@ -29,11 +25,11 @@ bg_logger.debug "something"
 
 ## Implementation
 
-Logsly loggers create and delegate to a [Logging](https://github.com/TwP/logging) logger instance.  When you mixin Loglsy on your logger class and create an instance of it, Logsly builds and configures a Logging logger for you.  Logsly delegates method calls to Logging, so Logsly loggers support the same API as Logging.
+Logsly creates and delegates to a [Logging logger](https://github.com/TwP/logging).  When you create an instance of your logger class, Logsly sets up and configures Logging for you.
 
 ## Settings
 
-* `name`: the name used to create the logger
+* `log_type`: custom string used to identify the type of the logger
 * `level`: the level in use (default: `'debug'`)
 * `outputs`: list of named outputs to log to (default: `[]`)
 

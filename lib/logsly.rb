@@ -5,8 +5,10 @@ require 'logsly/settings'
 module Logsly
 
   def self.included(receiver)
-    attr_reader :log_type, :level, :outputs, :logger
-    receiver.send(:include, LoggerMethods)
+    receiver.class_eval do
+      attr_reader :log_type, :level, :outputs, :logger
+      include LoggerMethods
+    end
   end
 
   class MixinOpts
