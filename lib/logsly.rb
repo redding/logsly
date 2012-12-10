@@ -11,20 +11,14 @@ module Logsly
     end
   end
 
-  class MixinOpts
-    include NsOptions::Proxy
-
-    option :level,   String, :default => 'info'
-    option :outputs, Array,  :default => []
-  end
-
   module LoggerMethods
 
-    def initialize(log_type, opts=nil)
-      @log_type = log_type.to_s
-      MixinOpts.new(opts).tap do |o|
-        @level, @outputs = o.level, o.outputs
+    def initialize(log_type, opts_hash=nil)
+      opts = NsOptions::Struct.new(opts_hash) do
+        option :level,   String, :default => 'info'
+        option :outputs, Array,  :default => []
       end
+      @log_type, @level, @outputs = log_type.to_s, opts.level, opts.outputs
 
       unique_name   = "#{self.class.name}-#{@log_type}-#{self.object_id}"
       @logger       = Logging.logger[unique_name]
