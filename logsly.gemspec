@@ -19,6 +19,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency("assert", ["~> 1.0"])
 
   gem.add_dependency("ns-options",  ["~> 1.1"])
-  gem.add_dependency("logging",     ["~> 1.8.0"])
+  gem.add_dependency("logging",     ["~> 1.7"])
 
 end
