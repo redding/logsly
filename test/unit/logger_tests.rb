@@ -57,10 +57,10 @@ module Logsly
     setup do
       Logsly.stdout 'my_stdout'
       Logsly.file('my_file') do |logger|
-        path "development-#{logger.log_type}.log"
+        path "log/development-#{logger.log_type}.log"
       end
       Logsly.file('my_other_file') do |logger|
-        path "other-#{logger.log_type}.log"
+        path "log/other-#{logger.log_type}.log"
       end
       Logsly.syslog('my_syslog') do |logger|
         identity "my_syslog_logger-#{logger.log_type}"
@@ -77,7 +77,7 @@ module Logsly
       filelog = extract_appender_from_logger(log, :file)
 
       assert_includes_appender Logging::Appenders::File, log
-      assert_equal 'development-test.log', filelog.name
+      assert_equal 'log/development-test.log', filelog.name
     end
 
     should "add a named syslog appender" do
