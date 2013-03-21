@@ -1,5 +1,6 @@
 require 'ns-options'
 require 'logging'
+require 'logsly/version'
 require 'logsly/settings'
 
 module Logsly
