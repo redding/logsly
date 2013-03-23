@@ -23,7 +23,7 @@ class Logsly::FileOutput
       @logger = OpenStruct.new
       @logger.debug_level = :white
       @logger.pattern = '%d : %m\n'
-      @logger.file = "dev.log"
+      @logger.file = "log/dev.log"
 
       Logsly.colors('a_color_scheme') do |logger|
         debug logger.debug_level
@@ -46,7 +46,7 @@ class Logsly::FileOutput
       appender = subject.to_appender @logger
 
       assert_kind_of Logging::Appenders::File,  appender
-      assert_equal   'dev.log',                 appender.name
+      assert_equal   'log/dev.log',             appender.name
       assert_kind_of Logging::Layouts::Pattern, appender.layout
       assert_equal   '%d : %m\n',               appender.layout.pattern
       assert_kind_of Logging::ColorScheme,      appender.layout.color_scheme
