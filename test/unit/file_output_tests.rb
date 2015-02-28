@@ -1,24 +1,14 @@
 require 'assert'
-require 'ostruct'
-require 'logging'
-require 'logsly/settings'
 require 'logsly/file_output'
+
+require 'logging'
+require 'ostruct'
+require 'logsly'
 
 class Logsly::FileOutput
 
-  class DataTests < Assert::Context
-    desc "the FileOutputData handler"
-    setup do
-      @data = Logsly::FileOutputData.new {}
-    end
-    subject { @data }
-
-    should have_imeth :path
-
-  end
-
-  class BaseTests < Assert::Context
-    desc "the StdoutOutput handler"
+  class UnitTests < Assert::Context
+    desc "Logsly::FileOutput"
     setup do
       @logger = OpenStruct.new
       @logger.debug_level = :white
@@ -36,7 +26,7 @@ class Logsly::FileOutput
         colors  'a_color_scheme'
       end
     end
-    subject { @out }
+    subject{ @out }
 
     should "be an output handler" do
       assert_kind_of Logsly::BaseOutput, subject
@@ -51,6 +41,18 @@ class Logsly::FileOutput
       assert_equal   '%d : %m\n',               appender.layout.pattern
       assert_kind_of Logging::ColorScheme,      appender.layout.color_scheme
     end
+
+  end
+
+  class FileOutputDataTests < Assert::Context
+    desc "FileOutputData"
+    setup do
+      @data = Logsly::FileOutputData.new {}
+    end
+    subject{ @data }
+
+    should have_imeth :path
+
   end
 
 end

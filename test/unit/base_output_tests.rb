@@ -1,12 +1,61 @@
 require 'assert'
-require 'logging'
-require 'logsly/settings'
 require 'logsly/base_output'
+
+require 'logging'
+require 'logsly'
 
 class Logsly::BaseOutput
 
-  class DataTests < Assert::Context
-    desc "the BaseOutputData handler"
+  class UnitTests < Assert::Context
+    desc "Logsly::BaseOutput"
+    setup do
+      @out = Logsly::BaseOutput.new {}
+    end
+    subject{ @out }
+
+    should have_reader :build
+    should have_imeths :to_layout, :to_appender
+
+    should "know its build" do
+      build_proc = Proc.new {}
+      out = Logsly::BaseOutput.new &build_proc
+
+      assert_same build_proc, out.build
+    end
+
+    should "expect `to_appender` to be defined by subclasses" do
+      assert_raises NotImplementedError do
+        subject.to_appender
+      end
+    end
+
+  end
+
+  class BuildTests < UnitTests
+    desc "given a build"
+    setup do
+      Logsly.colors('a_color_scheme') do
+        debug :white
+      end
+      @out = Logsly::BaseOutput.new do |*args|
+        pattern args.to_s
+        colors  'a_color_scheme'
+      end
+    end
+
+    should "build a Logging pattern layout" do
+      data = Logsly::BaseOutputData.new('%d : %m\n', &@out.build)
+      lay = subject.to_layout(data)
+
+      assert_kind_of Logging::Layout, lay
+      assert_equal   '%d : %m\n', lay.pattern
+      assert_kind_of Logging::ColorScheme, lay.color_scheme
+    end
+
+  end
+
+  class BaseOutputDataTests < Assert::Context
+    desc "BaseOutputData"
     setup do
       Logsly.colors('a_color_scheme') do
         debug :white
@@ -17,7 +66,7 @@ class Logsly::BaseOutput
         colors  'a_color_scheme'
       end
     end
-    subject { @lay }
+    subject{ @lay }
 
     should have_readers :pattern, :colors
 
@@ -44,54 +93,6 @@ class Logsly::BaseOutput
       end
       out_expected = {:pattern => out.pattern}
       assert_equal out_expected, out.to_pattern_opts
-    end
-
-  end
-
-  class BaseTests < Assert::Context
-    desc "the BaseOutput handler"
-    setup do
-      @out = Logsly::BaseOutput.new {}
-    end
-    subject { @out }
-
-    should have_reader :build
-    should have_imeths :to_layout, :to_appender
-
-    should "know its build" do
-      build_proc = Proc.new {}
-      out = Logsly::BaseOutput.new &build_proc
-
-      assert_same build_proc, out.build
-    end
-
-    should "expect `to_appender` to be defined by subclasses" do
-      assert_raises NotImplementedError do
-        subject.to_appender
-      end
-    end
-
-  end
-
-  class BuildTests < BaseTests
-    desc "given a build"
-    setup do
-      Logsly.colors('a_color_scheme') do
-        debug :white
-      end
-      @out = Logsly::BaseOutput.new do |*args|
-        pattern args.to_s
-        colors  'a_color_scheme'
-      end
-    end
-
-    should "build a Logging pattern layout" do
-      data = Logsly::BaseOutputData.new('%d : %m\n', &@out.build)
-      lay = subject.to_layout(data)
-
-      assert_kind_of Logging::Layout, lay
-      assert_equal   '%d : %m\n', lay.pattern
-      assert_kind_of Logging::ColorScheme, lay.color_scheme
     end
 
   end

@@ -8,10 +8,6 @@ require 'ns-options'
 
 module Logsly
 
-  class NullColors < OpenStruct
-    def to_scheme(*args); nil;  end
-  end
-
   class Colors
 
     attr_reader :name, :build
@@ -26,6 +22,10 @@ module Logsly
       end
     end
 
+  end
+
+  class NullColors < OpenStruct
+    def to_scheme(*args); nil;  end
   end
 
   class ColorsData

@@ -1,13 +1,14 @@
 require 'assert'
+require 'logsly/stdout_output'
+
 require 'ostruct'
 require 'logging'
-require 'logsly/settings'
-require 'logsly/stdout_output'
+require 'logsly'
 
 class Logsly::StdoutOutput
 
-  class BaseTests < Assert::Context
-    desc "the StdoutOutput handler"
+  class UnitTests < Assert::Context
+    desc "Logsly::StdoutOutput"
     setup do
       @logger = OpenStruct.new
       @logger.debug_level = :white
@@ -22,7 +23,7 @@ class Logsly::StdoutOutput
         colors  'a_color_scheme'
       end
     end
-    subject { @out }
+    subject{ @out }
 
     should "be an output handler" do
       assert_kind_of Logsly::BaseOutput, subject
@@ -36,6 +37,7 @@ class Logsly::StdoutOutput
       assert_equal   '%d : %m\n',                appender.layout.pattern
       assert_kind_of Logging::ColorScheme,       appender.layout.color_scheme
     end
+
   end
 
 end

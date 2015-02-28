@@ -1,33 +1,15 @@
 require 'assert'
+require 'logsly/syslog_output'
+
 require 'ostruct'
 require 'syslog'
 require 'logging'
-require 'logsly/settings'
-require 'logsly/syslog_output'
+require 'logsly'
 
 class Logsly::SyslogOutput
 
-  class DataTests < Assert::Context
-    desc "the FileOutputData handler"
-    setup do
-      @data = Logsly::SyslogOutputData.new {}
-    end
-    subject { @data }
-
-    should have_imeth :identity, :log_opts, :facility
-
-    should "default :log_opts" do
-      assert_equal (Syslog::LOG_PID | Syslog::LOG_CONS), subject.log_opts
-    end
-
-    should "default :facility" do
-      assert_equal Syslog::LOG_LOCAL0, subject.facility
-    end
-
-  end
-
-  class BaseTests < Assert::Context
-    desc "the SyslogOutput handler"
+  class UnitTests < Assert::Context
+    desc "Logsly::SyslogOutput"
     setup do
       @logger = OpenStruct.new
       @logger.debug_level = :white
@@ -47,7 +29,7 @@ class Logsly::SyslogOutput
         colors  'a_color_scheme'
       end
     end
-    subject { @out }
+    subject{ @out }
 
     should "be an output handler" do
       assert_kind_of Logsly::BaseOutput, subject
@@ -61,6 +43,26 @@ class Logsly::SyslogOutput
       assert_equal   '%d : %m\n',                appender.layout.pattern
       assert_kind_of Logging::ColorScheme,       appender.layout.color_scheme
     end
+
+  end
+
+  class SyslogOutputDataTests < Assert::Context
+    desc "SyslogOutputData"
+    setup do
+      @data = Logsly::SyslogOutputData.new {}
+    end
+    subject{ @data }
+
+    should have_imeth :identity, :log_opts, :facility
+
+    should "default :log_opts" do
+      assert_equal (Syslog::LOG_PID | Syslog::LOG_CONS), subject.log_opts
+    end
+
+    should "default :facility" do
+      assert_equal Syslog::LOG_LOCAL0, subject.facility
+    end
+
   end
 
 end

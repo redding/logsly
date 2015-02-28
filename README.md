@@ -19,7 +19,7 @@ logger = MyLogger.new(:outputs => ['my_stdout'])
 logger.info "whatever"
 
 # build another logger and use it
-bg_logger = MyLogger.new('bg', :level => 'debug', :outputs => ['my_logger_stdout'])
+bg_logger = MyLogger.new('bg', :level => 'debug', :outputs => ['my_stdout'])
 bg_logger.debug "something"
 ```
 
