@@ -68,6 +68,12 @@ module Logsly
       end
     end
 
+    def file_path
+      @file_path ||= if (appender = get_file_appender)
+        appender.name if appender.respond_to?(:name)
+      end
+    end
+
     # delegate all calls to the @logger
 
     def method_missing(method, *args, &block)
@@ -101,6 +107,10 @@ module Logsly
       @logger.appenders.detect do |existing|
         existing.kind_of?(appender.class) && existing.name == appender.name
       end
+    end
+
+    def get_file_appender
+      @logger.appenders.detect{ |a| a.kind_of?(Logging::Appenders::File) }
     end
 
   end
