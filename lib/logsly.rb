@@ -68,6 +68,10 @@ module Logsly
       end
     end
 
+    def mdc(key, value)
+      Logging.mdc[key] = value
+    end
+
     def file_path
       @file_path ||= if (appender = get_file_appender)
         appender.name if appender.respond_to?(:name)
