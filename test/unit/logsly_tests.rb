@@ -106,7 +106,7 @@ module Logsly
     subject{ @logger }
 
     should have_readers :log_type, :level, :outputs, :logger
-    should have_imeths :file_path
+    should have_imeths :mdc, :file_path
 
     should "know its log_type" do
       assert_equal 'testy_log_logger', subject.log_type
@@ -138,6 +138,15 @@ module Logsly
 
       log = TestLogger.new('test', :level => :debug)
       assert_equal Logging::LEVELS['debug'], log.logger.level
+    end
+
+    should "set mdc key/value pairs" do
+      key = Factory.string
+      assert_nil Logging.mdc[key]
+
+      value = Factory.string
+      subject.mdc(key, value)
+      assert_equal value, Logging.mdc[key]
     end
 
     should "not have a file path if no file appender is specified" do
