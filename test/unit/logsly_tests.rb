@@ -106,6 +106,7 @@ module Logsly
     subject{ @logger }
 
     should have_readers :log_type, :level, :outputs, :logger
+    should have_imeths :file_path
 
     should "know its log_type" do
       assert_equal 'testy_log_logger', subject.log_type
@@ -139,6 +140,10 @@ module Logsly
       assert_equal Logging::LEVELS['debug'], log.logger.level
     end
 
+    should "not have a file path if no file appender is specified" do
+      assert_nil subject.file_path
+    end
+
   end
 
   class AppenderTests < UnitTests
@@ -158,6 +163,7 @@ module Logsly
     should "add a named stdout appender" do
       log = TestLogger.new(:test, :outputs => 'my_stdout')
       assert_includes_appender Logging::Appenders::Stdout, log
+      assert_nil log.file_path
     end
 
     should "add a named file appender" do
@@ -166,11 +172,13 @@ module Logsly
 
       assert_includes_appender Logging::Appenders::File, log
       assert_equal 'log/development-test.log', filelog.name
+      assert_equal 'log/development-test.log', log.file_path
     end
 
     should "add a named syslog appender" do
       log = TestLogger.new(:test, :outputs => 'my_syslog')
       assert_includes_appender Logging::Appenders::Syslog, log
+      assert_nil log.file_path
     end
 
     should "not add duplicate appenders" do
@@ -203,7 +211,7 @@ module Logsly
         Logging::Appenders::Stdout
       end
 
-      logger.appenders.select{|a| a.is_a?(klass)}.first
+      logger.appenders.detect{ |a| a.is_a?(klass) }
     end
 
   end
