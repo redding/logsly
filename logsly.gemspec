@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version     = Logsly::VERSION
   gem.authors     = ["Kelly Redding", "Collin Redding"]
   gem.email       = ["kelly@kellyredding.com", "collin.redding@me.com"]
-  gem.description = %q{Create custom loggers.}
   gem.summary     = %q{Create custom loggers.}
+  gem.description = %q{Create custom loggers.}
   gem.homepage    = "http://github.com/redding/logsly"
   gem.license     = 'MIT'
 
@@ -18,9 +18,9 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_development_dependency("assert", ["~> 2.15"])
+  gem.add_development_dependency("assert", ["~> 2.15.1"])
 
-  gem.add_dependency("ns-options",  ["~> 1.1"])
+  gem.add_dependency("ns-options",  ["~> 1.1.6"])
   gem.add_dependency("logging",     ["~> 1.7"])
 
 end
