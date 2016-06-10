@@ -22,7 +22,7 @@ class Logsly::Colors
     end
 
     should "know its build" do
-      build_proc = Proc.new {}
+      build_proc = Proc.new{}
       out = Logsly::Colors.new 'test', &build_proc
 
       assert_same build_proc, out.build
