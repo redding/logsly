@@ -1,6 +1,4 @@
-require 'ns-options'
 require 'logging'
-require 'ostruct'
 require 'syslog'
 
 module Logsly; end
@@ -8,7 +6,7 @@ module Logsly::Outputs
 
   ## NULL
 
-  class Null < OpenStruct
+  class Null
     def to_appender(*args); nil; end
     def to_layout(*args);   nil; end
   end
@@ -40,13 +38,23 @@ module Logsly::Outputs
   end
 
   class BaseData
-    include NsOptions::Proxy
-    option :pattern, String, :default => '%m\n'
-    option :colors,  String
 
     def initialize(*args, &build)
+      @pattern = '%m\n'
+      @colors  = nil
+
       @args = args
       self.instance_exec(*@args, &(build || Proc.new{}))
+    end
+
+    def pattern(value = nil)
+      @pattern = value if !value.nil?
+      @pattern
+    end
+
+    def colors(value = nil)
+      @colors = value if !value.nil?
+      @colors
     end
 
     def to_pattern_opts
@@ -70,28 +78,38 @@ module Logsly::Outputs
   ## STDOUT
 
   class Stdout < Base
+
     def to_appender(*args)
       data = BaseData.new(*args, &self.build)
       Logging.appenders.stdout(:layout => self.to_layout(data))
     end
+
   end
 
   ## FILE
 
   class File < Base
+
     def to_appender(*args)
       data = FileData.new(*args, &self.build)
       Logging.appenders.file(data.path, :layout => self.to_layout(data))
     end
+
   end
 
   class FileData < BaseData
-    option :path, String
+
+    def path(value = nil)
+      @path = value if !value.nil?
+      @path
+    end
+
   end
 
   ## SYSLOG
 
   class Syslog < Base
+
     def to_appender(*args)
       ::Syslog.close if ::Syslog.opened?
 
@@ -102,12 +120,32 @@ module Logsly::Outputs
         :layout   => self.to_layout(data)
       })
     end
+
   end
 
   class SyslogData < BaseData
-    option :identity, String
-    option :log_opts, Integer, :default => (::Syslog::LOG_PID | ::Syslog::LOG_CONS)
-    option :facility, Integer, :default => ::Syslog::LOG_LOCAL0
+
+    def initialize(*args, &build)
+      super
+      @log_opts = (::Syslog::LOG_PID | ::Syslog::LOG_CONS)
+      @facility = ::Syslog::LOG_LOCAL0
+    end
+
+    def identity(value = nil)
+      @identity = value if !value.nil?
+      @identity
+    end
+
+    def log_opts(value = nil)
+      @log_opts = value if !value.nil?
+      @log_opts
+    end
+
+    def facility(value = nil)
+      @facility = value if !value.nil?
+      @facility
+    end
+
   end
 
 end
