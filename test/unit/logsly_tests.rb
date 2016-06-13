@@ -2,6 +2,7 @@ require 'assert'
 require 'logsly'
 
 require 'logging'
+require 'logsly/colors'
 require 'logsly/outputs'
 require 'test/support/logger'
 
@@ -130,8 +131,8 @@ module Logsly
     end
 
     should "create the Logging::Logger with a unique name" do
-      expected = "#{subject.class.name}-testy_log_logger-#{subject.object_id}"
-      assert_equal expected, subject.logger.name
+      exp = "#{subject.class.name}-testy_log_logger-#{subject.object_id}"
+      assert_equal exp, subject.logger.name
     end
 
     should "set the logger's level" do

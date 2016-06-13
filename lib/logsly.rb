@@ -1,59 +1,57 @@
-require 'ns-options'
+require 'much-plugin'
 require 'logging'
 require 'logsly/version'
 require 'logsly/colors'
 require 'logsly/outputs'
 
 module Logsly
+  include MuchPlugin
 
-  def self.included(receiver)
-    receiver.class_eval do
-      attr_reader :log_type, :level, :outputs, :logger
-      include LoggerMethods
-    end
-  end
+  plugin_included do
+    include InstanceMethods
 
-  module Settings
-    include NsOptions::Proxy
-
-    option :colors,  ::Hash, :default => ::Hash.new(NullColors.new)
-    option :outputs, ::Hash, :default => ::Hash.new(Outputs::Null.new)
   end
 
   def self.reset
-    Settings.reset
+    @settings = nil
     Logging.reset
   end
 
+  def self.settings
+    @settings ||= Settings.new
+  end
+
   def self.colors(name, &block)
-    Settings.colors[name.to_s] = Colors.new(name, &block) if !block.nil?
-    Settings.colors[name.to_s]
+    settings.colors[name.to_s] = Colors.new(name, &block) if !block.nil?
+    settings.colors[name.to_s]
   end
 
   def self.stdout(name, &block)
-    Settings.outputs[name.to_s] = Outputs::Stdout.new(&block)
+    settings.outputs[name.to_s] = Outputs::Stdout.new(&block)
   end
 
   def self.file(name, &block)
-    Settings.outputs[name.to_s] = Outputs::File.new(&block)
+    settings.outputs[name.to_s] = Outputs::File.new(&block)
   end
 
   def self.syslog(name, &block)
-    Settings.outputs[name.to_s] = Outputs::Syslog.new(&block)
+    settings.outputs[name.to_s] = Outputs::Syslog.new(&block)
   end
 
   def self.outputs(name)
-    Settings.outputs[name.to_s]
+    settings.outputs[name.to_s]
   end
 
-  module LoggerMethods
+  module InstanceMethods
 
-    def initialize(log_type, opts_hash=nil)
-      opts = NsOptions::Struct.new(opts_hash) do
-        option :level,   String, :default => 'info'
-        option :outputs, Array,  :default => []
-      end
-      @log_type, @level, @outputs = log_type.to_s, opts.level, opts.outputs
+    attr_reader :log_type, :level, :outputs, :logger
+
+    def initialize(log_type, opts = nil)
+      opts ||= {}
+
+      @log_type = log_type.to_s
+      @level    = (opts[:level]  || opts['level']   || 'info').to_s
+      @outputs  = opts[:outputs] || opts['outputs'] || []
 
       unique_name   = "#{self.class.name}-#{@log_type}-#{self.object_id}"
       @logger       = Logging.logger[unique_name]
@@ -113,6 +111,15 @@ module Logsly
       @logger.appenders.detect{ |a| a.kind_of?(Logging::Appenders::File) }
     end
 
+  end
+
+  class Settings
+    attr_reader :colors, :outputs
+
+    def initialize
+      @colors  = ::Hash.new(NullColors.new)
+      @outputs = ::Hash.new(Outputs::Null.new)
+    end
   end
 
 end

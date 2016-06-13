@@ -73,7 +73,7 @@ module Logsly::Outputs
     end
     subject{ @data }
 
-    should have_readers :pattern, :colors
+    should have_imeths :pattern, :colors
 
     should "know its defaults" do
       data = BaseData.new
@@ -177,7 +177,7 @@ module Logsly::Outputs
     end
     subject{ @data }
 
-    should have_imeth :path
+    should have_imeths :path
 
   end
 

@@ -90,21 +90,21 @@ class Logsly::Colors
         method_name :white
         info        :blue
       end
-      expected = {
+      exp = {
         :date    => :blue,
         :message => :cyan,
         :method  => :white,
         :levels  => {:info  => :blue},
       }
 
-      assert_equal expected, general_only.to_scheme_opts
+      assert_equal exp, general_only.to_scheme_opts
     end
 
     should "only include :levels and :lines if at least one is set" do
       no_levels_lines = Logsly::ColorsData.new { date :blue }
-      expected = { :date => :blue }
+      exp = { :date => :blue }
 
-      assert_equal expected, no_levels_lines.to_scheme_opts
+      assert_equal exp, no_levels_lines.to_scheme_opts
     end
 
   end
