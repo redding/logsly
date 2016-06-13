@@ -2,6 +2,7 @@ require 'assert'
 require 'logsly'
 
 require 'logging'
+require 'logsly/outputs'
 require 'test/support/logger'
 
 module Logsly
@@ -20,7 +21,7 @@ module Logsly
     end
 
     should "return a NullOutput obj when requesting an output that isn't defined" do
-      assert_kind_of NullOutput, Logsly.outputs('not_defined_yet')
+      assert_kind_of Outputs::Null, Logsly.outputs('not_defined_yet')
     end
 
     should "add a named color scheme using the `colors` method" do
@@ -31,27 +32,27 @@ module Logsly
     end
 
     should "add a named stdout output using the `stdout` method" do
-      assert_kind_of NullOutput, Logsly.outputs('test_stdout')
+      assert_kind_of Outputs::Null, Logsly.outputs('test_stdout')
       Logsly.stdout('test_stdout') {}
 
       assert_not_nil Logsly.outputs('test_stdout')
-      assert_kind_of StdoutOutput, Logsly.outputs('test_stdout')
+      assert_kind_of Outputs::Stdout, Logsly.outputs('test_stdout')
     end
 
     should "add a named file output using the `file` method" do
-      assert_kind_of NullOutput, Logsly.outputs('test_file')
+      assert_kind_of Outputs::Null, Logsly.outputs('test_file')
       Logsly.file('test_file') {}
 
       assert_not_nil Logsly.outputs('test_file')
-      assert_kind_of FileOutput, Logsly.outputs('test_file')
+      assert_kind_of Outputs::File, Logsly.outputs('test_file')
     end
 
     should "add a named syslog output using the `syslog` method" do
-      assert_kind_of NullOutput, Logsly.outputs('test_syslog')
+      assert_kind_of Outputs::Null, Logsly.outputs('test_syslog')
       Logsly.syslog('test_syslog') {}
 
       assert_not_nil Logsly.outputs('test_syslog')
-      assert_kind_of SyslogOutput, Logsly.outputs('test_syslog')
+      assert_kind_of Outputs::Syslog, Logsly.outputs('test_syslog')
     end
 
     should "convert non-string setting names to string" do
@@ -71,10 +72,10 @@ module Logsly
 
     should "overwrite same-named outputs settings" do
       Logsly.stdout('something') {}
-      assert_kind_of StdoutOutput, Logsly.outputs('something')
+      assert_kind_of Outputs::Stdout, Logsly.outputs('something')
 
       Logsly.file('something') {}
-      assert_kind_of FileOutput, Logsly.outputs('something')
+      assert_kind_of Outputs::File, Logsly.outputs('something')
     end
 
   end
@@ -86,14 +87,14 @@ module Logsly
       Logsly.stdout('test_stdout') {}
     end
 
-    should "reset the Settings" do
-      assert_kind_of Colors,       Logsly.colors('test_colors')
-      assert_kind_of StdoutOutput, Logsly.outputs('test_stdout')
+    should "reset the settings" do
+      assert_kind_of Colors,          Logsly.colors('test_colors')
+      assert_kind_of Outputs::Stdout, Logsly.outputs('test_stdout')
 
       Logsly.reset
 
-      assert_kind_of NullColors, Logsly.colors('test_colors')
-      assert_kind_of NullOutput, Logsly.outputs('test_stdout')
+      assert_kind_of NullColors,    Logsly.colors('test_colors')
+      assert_kind_of Outputs::Null, Logsly.outputs('test_stdout')
     end
 
   end

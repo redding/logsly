@@ -2,7 +2,7 @@ require 'ns-options'
 require 'logging'
 require 'logsly/version'
 require 'logsly/colors'
-require 'logsly/base_output'
+require 'logsly/outputs'
 
 module Logsly
 
@@ -17,7 +17,7 @@ module Logsly
     include NsOptions::Proxy
 
     option :colors,  ::Hash, :default => ::Hash.new(NullColors.new)
-    option :outputs, ::Hash, :default => ::Hash.new(NullOutput.new)
+    option :outputs, ::Hash, :default => ::Hash.new(Outputs::Null.new)
   end
 
   def self.reset
@@ -26,24 +26,20 @@ module Logsly
   end
 
   def self.colors(name, &block)
-    require 'logsly/colors'
     Settings.colors[name.to_s] = Colors.new(name, &block) if !block.nil?
     Settings.colors[name.to_s]
   end
 
   def self.stdout(name, &block)
-    require 'logsly/stdout_output'
-    Settings.outputs[name.to_s] = StdoutOutput.new(&block)
+    Settings.outputs[name.to_s] = Outputs::Stdout.new(&block)
   end
 
   def self.file(name, &block)
-    require 'logsly/file_output'
-    Settings.outputs[name.to_s] = FileOutput.new(&block)
+    Settings.outputs[name.to_s] = Outputs::File.new(&block)
   end
 
   def self.syslog(name, &block)
-    require 'logsly/syslog_output'
-    Settings.outputs[name.to_s] = SyslogOutput.new(&block)
+    Settings.outputs[name.to_s] = Outputs::Syslog.new(&block)
   end
 
   def self.outputs(name)
