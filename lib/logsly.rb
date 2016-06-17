@@ -51,7 +51,7 @@ module Logsly
 
       @log_type = log_type.to_s
       @level    = (opts[:level]  || opts['level']   || 'info').to_s
-      @outputs  = opts[:outputs] || opts['outputs'] || []
+      @outputs  = [*(opts[:outputs] || opts['outputs'] || [])]
 
       unique_name   = "#{self.class.name}-#{@log_type}-#{self.object_id}"
       @logger       = Logsly::Logging182.logger[unique_name]

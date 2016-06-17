@@ -40,21 +40,31 @@ module Logsly::Outputs
     desc "given a build"
     setup do
       Logsly.colors('a_color_scheme') do
-        debug :white
+        debug_line :white
       end
       @out = Base.new do |*args|
-        pattern args.to_s
+        pattern args.first
         colors  'a_color_scheme'
       end
     end
 
     should "build a Logsly::Logging182 pattern layout" do
-      data = BaseData.new('%d : %m\n', &@out.build)
+      data = BaseData.new('[%c{2}] [%l] %d : %m :\n', &@out.build)
       lay = subject.to_layout(data)
 
       assert_kind_of Logsly::Logging182::Layout, lay
-      assert_equal   '%d : %m\n', lay.pattern
       assert_kind_of Logsly::Logging182::ColorScheme, lay.color_scheme
+      assert_equal '[%c{2}] [%l] %d : %m :\n', lay.pattern
+
+      assert_nothing_raised do
+        event = ::Logsly::Logging182::LogEvent.new(
+          Factory.string,
+          ::Logsly::Logging182::LEVELS['debug'],
+          {},
+          []
+        )
+        lay.format(event)
+      end
     end
 
   end
