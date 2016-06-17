@@ -95,7 +95,7 @@ module Logsly::Logging182
         Thread.current[NAME] = obj.dup
       when Thread
         return if Thread.current == obj
-        Thread.exclusive {
+        DIAGNOSTIC_MUTEX.synchronize {
           Thread.current[NAME] = obj[NAME].dup if obj[NAME]
         }
       end
@@ -217,7 +217,7 @@ module Logsly::Logging182
         Thread.current[NAME] = obj.dup
       when Thread
         return if Thread.current == obj
-        Thread.exclusive {
+        DIAGNOSTIC_MUTEX.synchronize {
           Thread.current[NAME] = obj[NAME].dup if obj[NAME]
         }
       end
@@ -260,7 +260,7 @@ module Logsly::Logging182
   #
   def self.clear_diagnostic_contexts( all = false )
     if all
-      Thread.exclusive {
+      DIAGNOSTIC_MUTEX.synchronize {
         Thread.list.each { |thread|
           thread[MappedDiagnosticContext::NAME].clear if thread[MappedDiagnosticContext::NAME]
           thread[NestedDiagnosticContext::NAME].clear if thread[NestedDiagnosticContext::NAME]
@@ -273,6 +273,8 @@ module Logsly::Logging182
 
     self
   end
+
+  DIAGNOSTIC_MUTEX = Mutex.new
 
 end  # module Logsly::Logging182
 
