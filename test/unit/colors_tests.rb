@@ -1,7 +1,7 @@
 require 'assert'
 require 'logsly/colors'
 
-require 'logging'
+require 'logsly/logging182'
 
 class Logsly::Colors
 
@@ -39,12 +39,12 @@ class Logsly::Colors
       end
     end
 
-    should "build a unique Logging color scheme based on called args" do
+    should "build a unique Logsly::Logging182 color scheme based on called args" do
       arg = 'white'
       scheme_name = subject.to_scheme(arg)
 
       assert_equal   "test-#{arg.object_id}", scheme_name
-      assert_kind_of Logging::ColorScheme, Logging.color_scheme(scheme_name)
+      assert_kind_of Logsly::Logging182::ColorScheme, Logsly::Logging182.color_scheme(scheme_name)
     end
 
   end

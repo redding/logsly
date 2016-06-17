@@ -1,5 +1,5 @@
-require 'logging'
 require 'syslog'
+require 'logsly/logging182'
 
 module Logsly; end
 module Logsly::Outputs
@@ -28,7 +28,7 @@ module Logsly::Outputs
     end
 
     def to_layout(data)
-      Logging.layouts.pattern(data.to_pattern_opts)
+      Logsly::Logging182.layouts.pattern(data.to_pattern_opts)
     end
 
     def to_appender(*args)
@@ -81,7 +81,7 @@ module Logsly::Outputs
 
     def to_appender(*args)
       data = BaseData.new(*args, &self.build)
-      Logging.appenders.stdout(:layout => self.to_layout(data))
+      Logsly::Logging182.appenders.stdout(:layout => self.to_layout(data))
     end
 
   end
@@ -92,7 +92,7 @@ module Logsly::Outputs
 
     def to_appender(*args)
       data = FileData.new(*args, &self.build)
-      Logging.appenders.file(data.path, :layout => self.to_layout(data))
+      Logsly::Logging182.appenders.file(data.path, :layout => self.to_layout(data))
     end
 
   end
@@ -114,7 +114,7 @@ module Logsly::Outputs
       ::Syslog.close if ::Syslog.opened?
 
       data = SyslogData.new(*args, &self.build)
-      Logging.appenders.syslog(data.identity, {
+      Logsly::Logging182.appenders.syslog(data.identity, {
         :logopt   => data.log_opts,
         :facility => data.facility,
         :layout   => self.to_layout(data)

@@ -1,7 +1,7 @@
 require 'assert'
 require 'logsly'
 
-require 'logging'
+require 'logsly/logging182'
 require 'logsly/colors'
 require 'logsly/outputs'
 require 'test/support/logger'
@@ -125,30 +125,30 @@ module Logsly
       assert_equal [:stdout], log.outputs
     end
 
-    should "create a Logging::Logger" do
+    should "create a Logsly::Logging182::Logger" do
       assert_not_nil subject.logger
-      assert_kind_of Logging::Logger, subject.logger
+      assert_kind_of Logsly::Logging182::Logger, subject.logger
     end
 
-    should "create the Logging::Logger with a unique name" do
+    should "create the Logsly::Logging182::Logger with a unique name" do
       exp = "#{subject.class.name}-testy_log_logger-#{subject.object_id}"
       assert_equal exp, subject.logger.name
     end
 
     should "set the logger's level" do
-      assert_equal Logging::LEVELS['info'], subject.logger.level
+      assert_equal Logsly::Logging182::LEVELS['info'], subject.logger.level
 
       log = TestLogger.new('test', :level => :debug)
-      assert_equal Logging::LEVELS['debug'], log.logger.level
+      assert_equal Logsly::Logging182::LEVELS['debug'], log.logger.level
     end
 
     should "set mdc key/value pairs" do
       key = Factory.string
-      assert_nil Logging.mdc[key]
+      assert_nil Logsly::Logging182.mdc[key]
 
       value = Factory.string
       subject.mdc(key, value)
-      assert_equal value, Logging.mdc[key]
+      assert_equal value, Logsly::Logging182.mdc[key]
     end
 
     should "not have a file path if no file appender is specified" do
@@ -173,7 +173,7 @@ module Logsly
 
     should "add a named stdout appender" do
       log = TestLogger.new(:test, :outputs => 'my_stdout')
-      assert_includes_appender Logging::Appenders::Stdout, log
+      assert_includes_appender Logsly::Logging182::Appenders::Stdout, log
       assert_nil log.file_path
     end
 
@@ -181,14 +181,14 @@ module Logsly
       log     = TestLogger.new(:test, :outputs => 'my_file')
       filelog = extract_appender_from_logger(log, :file)
 
-      assert_includes_appender Logging::Appenders::File, log
+      assert_includes_appender Logsly::Logging182::Appenders::File, log
       assert_equal 'log/development-test.log', filelog.name
       assert_equal 'log/development-test.log', log.file_path
     end
 
     should "add a named syslog appender" do
       log = TestLogger.new(:test, :outputs => 'my_syslog')
-      assert_includes_appender Logging::Appenders::Syslog, log
+      assert_includes_appender Logsly::Logging182::Appenders::Syslog, log
       assert_nil log.file_path
     end
 
@@ -215,11 +215,11 @@ module Logsly
     def extract_appender_from_logger(logger, type)
       klass = case type
       when :syslog
-        Logging::Appenders::Syslog
+        Logsly::Logging182::Appenders::Syslog
       when :file
-        Logging::Appenders::File
+        Logsly::Logging182::Appenders::File
       when :stdout
-        Logging::Appenders::Stdout
+        Logsly::Logging182::Appenders::Stdout
       end
 
       logger.appenders.detect{ |a| a.is_a?(klass) }

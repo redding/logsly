@@ -1,7 +1,7 @@
 require 'assert'
 require 'logsly/outputs'
 
-require 'logging'
+require 'logsly/logging182'
 require 'logsly'
 
 module Logsly::Outputs
@@ -48,13 +48,13 @@ module Logsly::Outputs
       end
     end
 
-    should "build a Logging pattern layout" do
+    should "build a Logsly::Logging182 pattern layout" do
       data = BaseData.new('%d : %m\n', &@out.build)
       lay = subject.to_layout(data)
 
-      assert_kind_of Logging::Layout, lay
+      assert_kind_of Logsly::Logging182::Layout, lay
       assert_equal   '%d : %m\n', lay.pattern
-      assert_kind_of Logging::ColorScheme, lay.color_scheme
+      assert_kind_of Logsly::Logging182::ColorScheme, lay.color_scheme
     end
 
   end
@@ -122,13 +122,13 @@ module Logsly::Outputs
       assert_kind_of Base, subject
     end
 
-    should "build a Logging stdout appender, passing args to the builds" do
+    should "build a Logsly::Logging182 stdout appender, passing args to the builds" do
       appender = subject.to_appender @logger
 
-      assert_kind_of Logging::Appenders::Stdout, appender
-      assert_kind_of Logging::Layouts::Pattern,  appender.layout
-      assert_equal   '%d : %m\n',                appender.layout.pattern
-      assert_kind_of Logging::ColorScheme,       appender.layout.color_scheme
+      assert_kind_of Logsly::Logging182::Appenders::Stdout, appender
+      assert_kind_of Logsly::Logging182::Layouts::Pattern,  appender.layout
+      assert_kind_of Logsly::Logging182::ColorScheme,       appender.layout.color_scheme
+      assert_equal '%d : %m\n', appender.layout.pattern
     end
 
   end
@@ -158,14 +158,14 @@ module Logsly::Outputs
       assert_kind_of Base, subject
     end
 
-    should "build a Logging file appender, passing args to the builds" do
+    should "build a Logsly::Logging182 file appender, passing args to the builds" do
       appender = subject.to_appender @logger
 
-      assert_kind_of Logging::Appenders::File,  appender
-      assert_equal   'log/dev.log',             appender.name
-      assert_kind_of Logging::Layouts::Pattern, appender.layout
-      assert_equal   '%d : %m\n',               appender.layout.pattern
-      assert_kind_of Logging::ColorScheme,      appender.layout.color_scheme
+      assert_kind_of Logsly::Logging182::Appenders::File,  appender
+      assert_kind_of Logsly::Logging182::Layouts::Pattern, appender.layout
+      assert_kind_of Logsly::Logging182::ColorScheme,      appender.layout.color_scheme
+      assert_equal 'log/dev.log', appender.name
+      assert_equal '%d : %m\n',   appender.layout.pattern
     end
 
   end
@@ -208,13 +208,13 @@ module Logsly::Outputs
       assert_kind_of Base, subject
     end
 
-    should "build a Logging syslog appender, passing args to the builds" do
+    should "build a Logsly::Logging182 syslog appender, passing args to the builds" do
       appender = subject.to_appender @logger
 
-      assert_kind_of Logging::Appenders::Syslog, appender
-      assert_kind_of Logging::Layouts::Pattern,  appender.layout
-      assert_equal   '%d : %m\n',                appender.layout.pattern
-      assert_kind_of Logging::ColorScheme,       appender.layout.color_scheme
+      assert_kind_of Logsly::Logging182::Appenders::Syslog, appender
+      assert_kind_of Logsly::Logging182::Layouts::Pattern,  appender.layout
+      assert_kind_of Logsly::Logging182::ColorScheme,       appender.layout.color_scheme
+      assert_equal '%d : %m\n', appender.layout.pattern
     end
 
   end

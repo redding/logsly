@@ -25,7 +25,9 @@ bg_logger.debug "something"
 
 ## Implementation
 
-Logsly creates and delegates to a [Logging logger](https://github.com/TwP/logging).  When you create an instance of your logger class, Logsly sets up and configures Logging for you.
+Logsly creates and delegates to a [Logging logger](https://github.com/TwP/logging/tree/logging-1.8.2).  When you create an instance of your logger class, Logsly sets up and configures Logging for you.
+
+**Note**: [Logging v1.8.2](https://github.com/TwP/logging/tree/logging-1.8.2) is the last version that is Ruby 1.8.7 compatible.  However, that version doesn't work in modern Ruby versions.  Therefore I've taken the source from Logging v1.8.2 and brought it in manually as a submodule under the `Logsly::Logging182` namespace.  I've tweaked the original source to allow properly requiring/referencing it as a submodule and to also make it work in modern Ruby.  All source in the `Logsly::Logging182` namespace is [MIT License Copyright (c) 2012 Tim Pease](https://github.com/TwP/logging/tree/logging-1.8.2#license) and all credit is his.
 
 ## Settings
 
@@ -76,7 +78,7 @@ Define a named syslog output to use with your loggers.  Takes the same parameter
 
 ### Patterns
 
-Each output can define what pattern to format its messages with using the `pattern' method.  See [Logging's patterns](https://github.com/TwP/logging/blob/master/lib/logging/layouts/pattern.rb) for details.
+Each output can define what pattern to format its messages with using the `pattern' method.  See [Logging's patterns](https://github.com/TwP/logging/blob/logging-1.8.2/lib/logging/layouts/pattern.rb) for details.
 
 ### Colors
 
@@ -93,7 +95,7 @@ Logsly.colors('my_colors') do
 end
 ```
 
-Define a named color scheme to use on your outputs.  Essentially creates a [Logging::ColorScheme](https://github.com/TwP/logging/blob/master/lib/logging/color_scheme.rb) object.  See that file for configuration and details.
+Define a named color scheme to use on your outputs.  Essentially creates a [Logging::ColorScheme](https://github.com/TwP/logging/blob/logging-1.8.2/lib/logging/color_scheme.rb) object.  See that file for configuration and details.
 
 ## Installation
 
