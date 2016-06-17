@@ -1,6 +1,6 @@
 # This class provides a DSL for setting color scheme values and lazy eval's
 # the DSL to generate a Logging color scheme object.
-# See https://github.com/TwP/logging/blob/master/lib/logging/color_scheme.rb
+# See https://github.com/TwP/logging/blob/logging-1.8.2/lib/logging/color_scheme.rb
 # for details on Logging color schemes.
 
 module Logsly
@@ -19,7 +19,7 @@ module Logsly
 
     def to_scheme(*args)
       "#{@name}-#{args.map{|a| a.object_id}.join('-')}".tap do |scheme_name|
-        Logging.color_scheme(scheme_name, ColorsData.new(*args, &@build).to_scheme_opts)
+        Logsly::Logging182.color_scheme(scheme_name, ColorsData.new(*args, &@build).to_scheme_opts)
       end
     end
 

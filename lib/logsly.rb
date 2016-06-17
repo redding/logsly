@@ -1,6 +1,6 @@
 require 'much-plugin'
-require 'logging'
 require 'logsly/version'
+require 'logsly/logging182'
 require 'logsly/colors'
 require 'logsly/outputs'
 
@@ -14,7 +14,7 @@ module Logsly
 
   def self.reset
     @settings = nil
-    Logging.reset
+    Logsly::Logging182.reset
   end
 
   def self.settings
@@ -54,7 +54,7 @@ module Logsly
       @outputs  = opts[:outputs] || opts['outputs'] || []
 
       unique_name   = "#{self.class.name}-#{@log_type}-#{self.object_id}"
-      @logger       = Logging.logger[unique_name]
+      @logger       = Logsly::Logging182.logger[unique_name]
       @logger.level = @level
 
       @outputs.each do |output|
@@ -63,7 +63,7 @@ module Logsly
     end
 
     def mdc(key, value)
-      Logging.mdc[key] = value
+      Logsly::Logging182.mdc[key] = value
     end
 
     def file_path
@@ -108,7 +108,7 @@ module Logsly
     end
 
     def get_file_appender
-      @logger.appenders.detect{ |a| a.kind_of?(Logging::Appenders::File) }
+      @logger.appenders.detect{ |a| a.kind_of?(Logsly::Logging182::Appenders::File) }
     end
 
   end
