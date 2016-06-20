@@ -49,12 +49,12 @@ module Logsly::Outputs
     end
 
     should "build a Logsly::Logging182 pattern layout" do
-      data = BaseData.new('[%c{2}] [%l] %d : %m :\n', &@out.build)
+      data = BaseData.new('[%c{2}] [%l] %d : %m : %X{test} : %x :\n', &@out.build)
       lay = subject.to_layout(data)
 
       assert_kind_of Logsly::Logging182::Layout, lay
       assert_kind_of Logsly::Logging182::ColorScheme, lay.color_scheme
-      assert_equal '[%c{2}] [%l] %d : %m :\n', lay.pattern
+      assert_equal '[%c{2}] [%l] %d : %m : %X{test} : %x :\n', lay.pattern
 
       assert_nothing_raised do
         event = ::Logsly::Logging182::LogEvent.new(

@@ -515,7 +515,7 @@ module Logsly::Logging182::Layouts
         fmt = color_scheme.color(fmt, COLOR_ALIAS_TABLE[directive]) if colorize?
 
         format_string << fmt
-        sprintf_args << "::Logging.mdc['#{key}']"
+        sprintf_args << "Logsly::Logging182.mdc['#{key}']"
 
         nil
       end
@@ -537,7 +537,7 @@ module Logsly::Logging182::Layouts
         format_string << fmt
         separator = separator.to_s
         separator = ' ' if separator.empty?
-        sprintf_args << "::Logging.ndc.context.join('#{separator}')"
+        sprintf_args << "Logsly::Logging182.ndc.context.join('#{separator}')"
 
         nil
       end
