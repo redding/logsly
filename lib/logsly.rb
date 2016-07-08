@@ -1,3 +1,4 @@
+require 'logger'
 require 'much-plugin'
 require 'logsly/version'
 require 'logsly/logging182'
@@ -6,6 +7,8 @@ require 'logsly/outputs'
 
 module Logsly
   include MuchPlugin
+
+  DEFAULT_LEVEL = 'info'.freeze
 
   plugin_included do
     include InstanceMethods
@@ -44,21 +47,27 @@ module Logsly
 
   module InstanceMethods
 
-    attr_reader :log_type, :level, :outputs, :logger
+    attr_reader :log_type, :level, :outputs, :output_loggers
 
     def initialize(log_type, opts = nil)
       opts ||= {}
 
       @log_type = log_type.to_s
-      @level    = (opts[:level]  || opts['level']   || 'info').to_s
-      @outputs  = [*(opts[:outputs] || opts['outputs'] || [])]
+      @level    = (opts[:level] || opts['level'] || DEFAULT_LEVEL).to_s
+      @outputs  = [*(opts[:outputs] || opts['outputs'] || [])].uniq
 
-      unique_name   = "#{self.class.name}-#{@log_type}-#{self.object_id}"
-      @logger       = Logsly::Logging182.logger[unique_name]
-      @logger.level = @level
+      @output_loggers = @outputs.inject({}) do |hash, output_name|
+        unique_name = "#{self.class.name}-#{@log_type}-#{self.object_id}-#{output_name}"
+        logger      = Logsly::Logging182.logger[unique_name]
+        output      = Logsly.outputs(output_name)
+        output_data = output.data(self)
 
-      @outputs.each do |output|
-        add_appender(Logsly.outputs(output).to_appender(self))
+        # prefer output-specific level; fall back to general level
+        logger.level = output_data ? output_data.level : @level
+        add_appender(logger, output.to_appender(output_data))
+
+        hash[output_name] = logger
+        hash
       end
     end
 
@@ -67,18 +76,28 @@ module Logsly
     end
 
     def file_path
-      @file_path ||= if (appender = get_file_appender)
+      @file_path ||= if (appender = get_file_appender(self.appenders))
         appender.name if appender.respond_to?(:name)
       end
     end
 
-    # delegate all calls to the @logger
+    # delegate all logger level method calls to the output loggers
 
-    def method_missing(method, *args, &block)
-      @logger.send(method, *args, &block)
+    ::Logger::Severity.constants.each do |name|
+      define_method(name.downcase) do |*args, &block|
+        self.output_loggers.each do |_, logger|
+          logger.send(name.downcase, *args, &block)
+        end
+      end
+      define_method("#{name.downcase}?") do |*args, &block|
+        self.output_loggers.inject(false) do |bool, (_, logger)|
+          bool || logger.send("#{name.downcase}?", *args, &block)
+        end
+      end
     end
-    def respond_to?(method)
-      super || @logger.respond_to?(method)
+
+    def appenders
+      @appenders ||= self.output_loggers.map{ |(_, l)| l.appenders }.flatten
     end
 
     def ==(other_logger)
@@ -97,18 +116,12 @@ module Logsly
 
     private
 
-    def add_appender(appender)
-      @logger.add_appenders(appender) if appender && !appender_added?(appender)
+    def add_appender(output_logger, appender)
+      output_logger.add_appenders(appender) if appender
     end
 
-    def appender_added?(appender)
-      @logger.appenders.detect do |existing|
-        existing.kind_of?(appender.class) && existing.name == appender.name
-      end
-    end
-
-    def get_file_appender
-      @logger.appenders.detect{ |a| a.kind_of?(Logsly::Logging182::Appenders::File) }
+    def get_file_appender(appenders)
+      self.appenders.detect{ |a| a.kind_of?(Logsly::Logging182::Appenders::File) }
     end
 
   end

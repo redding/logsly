@@ -17,6 +17,10 @@ module Logsly
 
     should have_imeths :reset, :colors, :stdout, :file, :syslog, :outputs
 
+    should "know its default level" do
+      assert_equal 'info', DEFAULT_LEVEL
+    end
+
     should "return a NullColors obj when requesting a color scheme that isn't defined" do
       assert_kind_of NullColors, Logsly.colors('not_defined_yet')
     end
@@ -107,39 +111,45 @@ module Logsly
     end
     subject{ @logger }
 
-    should have_readers :log_type, :level, :outputs, :logger
+    should have_readers :log_type, :level, :outputs, :output_loggers
     should have_imeths :mdc, :file_path
+    should have_imeths *::Logger::Severity.constants.map{ |n| n.downcase.to_sym }
+    should have_imeths *::Logger::Severity.constants.map{ |n| "#{n.downcase}?".to_sym }
 
     should "know its log_type" do
       assert_equal 'testy_log_logger', subject.log_type
     end
 
     should "know its default opt values" do
-      assert_equal 'info', subject.level
-      assert_equal [],     subject.outputs
+      assert_equal DEFAULT_LEVEL, subject.level
+      assert_equal [],            subject.outputs
     end
 
     should "allow overridding the default opt values" do
-      log = TestLogger.new(:testy_debug_logger, :level => :debug, :outputs => [:stdout])
+      log = TestLogger.new(:testy_debug_logger, {
+        :level   => :debug,
+        :outputs => :stdout
+      })
       assert_equal 'debug',   log.level
       assert_equal [:stdout], log.outputs
     end
 
-    should "create a Logsly::Logging182::Logger" do
-      assert_not_nil subject.logger
-      assert_kind_of Logsly::Logging182::Logger, subject.logger
-    end
+    should "create a Logsly::Logging182::Logger for each output" do
+      assert_empty subject.output_loggers
 
-    should "create the Logsly::Logging182::Logger with a unique name" do
-      exp = "#{subject.class.name}-testy_log_logger-#{subject.object_id}"
-      assert_equal exp, subject.logger.name
-    end
+      outputs = Factory.integer(3).times.map{ Factory.string }
+      log = TestLogger.new(:testy_log_logger, :outputs => outputs)
+      outputs.each do |output|
+        logger = log.output_loggers[output]
+        assert_kind_of Logsly::Logging182::Logger, logger
 
-    should "set the logger's level" do
-      assert_equal Logsly::Logging182::LEVELS['info'], subject.logger.level
+        # set a unique name for  each logger
+        exp = "#{log.class.name}-testy_log_logger-#{log.object_id}-#{output}"
+        assert_equal exp, logger.name
 
-      log = TestLogger.new('test', :level => :debug)
-      assert_equal Logsly::Logging182::LEVELS['debug'], log.logger.level
+        # default the level for each logger
+        assert_equal Logsly::Logging182::LEVELS[DEFAULT_LEVEL], logger.level
+      end
     end
 
     should "set mdc key/value pairs" do
@@ -159,37 +169,50 @@ module Logsly
 
   class AppenderTests < UnitTests
     setup do
-      Logsly.stdout 'my_stdout'
+      Logsly.stdout('my_stdout') do |logger|
+        level 'debug'
+      end
       Logsly.file('my_file') do |logger|
         path "log/development-#{logger.log_type}.log"
+        level 'debug'
       end
       Logsly.file('my_other_file') do |logger|
         path "log/other-#{logger.log_type}.log"
       end
       Logsly.syslog('my_syslog') do |logger|
         identity "my_syslog_logger-#{logger.log_type}"
+        level 'debug'
       end
     end
 
-    should "add a named stdout appender" do
+    should "add a named stdout appender and honor its level" do
       log = TestLogger.new(:test, :outputs => 'my_stdout')
       assert_includes_appender Logsly::Logging182::Appenders::Stdout, log
       assert_nil log.file_path
+
+      exp = Logsly::Logging182::LEVELS['debug']
+      assert_equal exp, log.output_loggers['my_stdout'].level
     end
 
-    should "add a named file appender" do
+    should "add a named file appender and honor its level" do
       log     = TestLogger.new(:test, :outputs => 'my_file')
       filelog = extract_appender_from_logger(log, :file)
 
       assert_includes_appender Logsly::Logging182::Appenders::File, log
       assert_equal 'log/development-test.log', filelog.name
       assert_equal 'log/development-test.log', log.file_path
+
+      exp = Logsly::Logging182::LEVELS['debug']
+      assert_equal exp, log.output_loggers['my_file'].level
     end
 
-    should "add a named syslog appender" do
+    should "add a named syslog appender and honor its level" do
       log = TestLogger.new(:test, :outputs => 'my_syslog')
       assert_includes_appender Logsly::Logging182::Appenders::Syslog, log
       assert_nil log.file_path
+
+      exp = Logsly::Logging182::LEVELS['debug']
+      assert_equal exp, log.output_loggers['my_syslog'].level
     end
 
     should "not add duplicate appenders" do

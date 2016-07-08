@@ -8,6 +8,30 @@ module Logsly::Outputs
 
   class UnitTests < Assert::Context
     desc "Logsly::Outputs"
+    subject{ @out }
+
+    should "know its default pattern" do
+      assert_equal '%m\n', Logsly::Outputs::DEFAULT_PATTERN
+    end
+
+  end
+
+  class NullTests < UnitTests
+    desc "Null"
+    setup do
+      @out = Null.new
+    end
+
+    should have_imeths :data, :to_layout, :to_appender
+
+    should "know its data" do
+      assert_nil subject.data
+    end
+
+    should "always return `nil` converting to a layout/appender" do
+      assert_nil subject.to_layout(Factory.string)
+      assert_nil subject.to_appender(Factory.string)
+    end
 
   end
 
@@ -16,10 +40,9 @@ module Logsly::Outputs
     setup do
       @out = Base.new
     end
-    subject{ @out }
 
     should have_reader :build
-    should have_imeths :to_layout, :to_appender
+    should have_imeths :data, :to_layout, :to_appender
 
     should "know its build" do
       build_proc = Proc.new{}
@@ -28,9 +51,10 @@ module Logsly::Outputs
       assert_same build_proc, out.build
     end
 
-    should "expect `to_appender` to be defined by subclasses" do
+    should "expect `data` and `to_appender` to be defined by subclasses" do
+      assert_raises(NotImplementedError){ subject.data }
       assert_raises NotImplementedError do
-        subject.to_appender
+        subject.to_appender(Factory.string)
       end
     end
 
@@ -79,21 +103,24 @@ module Logsly::Outputs
       @data = BaseData.new(@arg) do |*args|
         pattern args.first
         colors  'a_color_scheme'
+        level   'info'
       end
     end
     subject{ @data }
 
-    should have_imeths :pattern, :colors
+    should have_imeths :pattern, :colors, :level
 
     should "know its defaults" do
       data = BaseData.new
-      assert_equal '%m\n', data.pattern
+      assert_equal DEFAULT_PATTERN, data.pattern
       assert_nil data.colors
+      assert_nil data.level
     end
 
     should "instance exec its build with args" do
       assert_equal '%d : %m\n',      subject.pattern
       assert_equal 'a_color_scheme', subject.colors
+      assert_equal 'info',           subject.level
     end
 
     should "know its layout pattern opts hash" do
@@ -124,6 +151,7 @@ module Logsly::Outputs
       @out = Stdout.new do |logger|
         pattern logger.pattern
         colors  'a_color_scheme'
+        level   'info'
       end
     end
     subject{ @out }
@@ -132,13 +160,21 @@ module Logsly::Outputs
       assert_kind_of Base, subject
     end
 
+    should "know its data" do
+      data = subject.data(@logger)
+      assert_instance_of BaseData, data
+      assert_equal @logger.pattern,  data.pattern
+      assert_equal 'a_color_scheme', data.colors
+      assert_equal 'info',           data.level
+    end
+
     should "build a Logsly::Logging182 stdout appender, passing args to the builds" do
-      appender = subject.to_appender @logger
+      appender = subject.to_appender(subject.data(@logger))
 
       assert_kind_of Logsly::Logging182::Appenders::Stdout, appender
       assert_kind_of Logsly::Logging182::Layouts::Pattern,  appender.layout
       assert_kind_of Logsly::Logging182::ColorScheme,       appender.layout.color_scheme
-      assert_equal '%d : %m\n', appender.layout.pattern
+      assert_equal @logger.pattern, appender.layout.pattern
     end
 
   end
@@ -160,6 +196,7 @@ module Logsly::Outputs
 
         pattern logger.pattern
         colors  'a_color_scheme'
+        level   'info'
       end
     end
     subject{ @out }
@@ -168,14 +205,23 @@ module Logsly::Outputs
       assert_kind_of Base, subject
     end
 
+    should "know its data" do
+      data = subject.data(@logger)
+      assert_instance_of FileData, data
+      assert_equal @logger.file,     data.path
+      assert_equal @logger.pattern,  data.pattern
+      assert_equal 'a_color_scheme', data.colors
+      assert_equal 'info',           data.level
+    end
+
     should "build a Logsly::Logging182 file appender, passing args to the builds" do
-      appender = subject.to_appender @logger
+      appender = subject.to_appender(subject.data(@logger))
 
       assert_kind_of Logsly::Logging182::Appenders::File,  appender
       assert_kind_of Logsly::Logging182::Layouts::Pattern, appender.layout
       assert_kind_of Logsly::Logging182::ColorScheme,      appender.layout.color_scheme
-      assert_equal 'log/dev.log', appender.name
-      assert_equal '%d : %m\n',   appender.layout.pattern
+      assert_equal @logger.file,    appender.name
+      assert_equal @logger.pattern, appender.layout.pattern
     end
 
   end
@@ -210,6 +256,7 @@ module Logsly::Outputs
 
         pattern logger.pattern
         colors  'a_color_scheme'
+        level   'info'
       end
     end
     subject{ @out }
@@ -218,13 +265,23 @@ module Logsly::Outputs
       assert_kind_of Base, subject
     end
 
+    should "know its data" do
+      data = subject.data(@logger)
+      assert_instance_of SyslogData, data
+      assert_equal @logger.identity, data.identity
+      assert_equal @logger.facility, data.facility
+      assert_equal @logger.pattern,  data.pattern
+      assert_equal 'a_color_scheme', data.colors
+      assert_equal 'info',           data.level
+    end
+
     should "build a Logsly::Logging182 syslog appender, passing args to the builds" do
-      appender = subject.to_appender @logger
+      appender = subject.to_appender(subject.data(@logger))
 
       assert_kind_of Logsly::Logging182::Appenders::Syslog, appender
       assert_kind_of Logsly::Logging182::Layouts::Pattern,  appender.layout
       assert_kind_of Logsly::Logging182::ColorScheme,       appender.layout.color_scheme
-      assert_equal '%d : %m\n', appender.layout.pattern
+      assert_equal @logger.pattern, appender.layout.pattern
     end
 
   end

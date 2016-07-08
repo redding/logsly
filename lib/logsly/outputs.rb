@@ -4,11 +4,14 @@ require 'logsly/logging182'
 module Logsly; end
 module Logsly::Outputs
 
+  DEFAULT_PATTERN = '%m\n'.freeze # log the message only
+
   ## NULL
 
   class Null
-    def to_appender(*args); nil; end
-    def to_layout(*args);   nil; end
+    def data(*args);       nil; end
+    def to_layout(data);   nil; end
+    def to_appender(data); nil; end
   end
 
   ## BASE
@@ -21,17 +24,15 @@ module Logsly::Outputs
       @build = build || Proc.new{}
     end
 
-    def to_appender(*args)
-      self.instance_exec(*args, &@build)
-      self.colors_obj.run_build(*args)
-      self
+    def data(*args)
+      raise NotImplementedError
     end
 
     def to_layout(data)
       Logsly::Logging182.layouts.pattern(data.to_pattern_opts)
     end
 
-    def to_appender(*args)
+    def to_appender(data)
       raise NotImplementedError
     end
 
@@ -40,8 +41,9 @@ module Logsly::Outputs
   class BaseData
 
     def initialize(*args, &build)
-      @pattern = '%m\n'
+      @pattern = DEFAULT_PATTERN
       @colors  = nil
+      @level   = nil
 
       @args = args
       self.instance_exec(*@args, &(build || Proc.new{}))
@@ -55,6 +57,11 @@ module Logsly::Outputs
     def colors(value = nil)
       @colors = value if !value.nil?
       @colors
+    end
+
+    def level(value = nil)
+      @level = value if !value.nil?
+      @level
     end
 
     def to_pattern_opts
@@ -79,8 +86,11 @@ module Logsly::Outputs
 
   class Stdout < Base
 
-    def to_appender(*args)
-      data = BaseData.new(*args, &self.build)
+    def data(*args)
+      BaseData.new(*args, &self.build)
+    end
+
+    def to_appender(data)
       Logsly::Logging182.appenders.stdout(:layout => self.to_layout(data))
     end
 
@@ -90,8 +100,11 @@ module Logsly::Outputs
 
   class File < Base
 
-    def to_appender(*args)
-      data = FileData.new(*args, &self.build)
+    def data(*args)
+      FileData.new(*args, &self.build)
+    end
+
+    def to_appender(data)
       Logsly::Logging182.appenders.file(data.path, :layout => self.to_layout(data))
     end
 
@@ -110,10 +123,13 @@ module Logsly::Outputs
 
   class Syslog < Base
 
-    def to_appender(*args)
+    def data(*args)
+      SyslogData.new(*args, &self.build)
+    end
+
+    def to_appender(data)
       ::Syslog.close if ::Syslog.opened?
 
-      data = SyslogData.new(*args, &self.build)
       Logsly::Logging182.appenders.syslog(data.identity, {
         :logopt   => data.log_opts,
         :facility => data.facility,
@@ -126,9 +142,9 @@ module Logsly::Outputs
   class SyslogData < BaseData
 
     def initialize(*args, &build)
-      super
       @log_opts = (::Syslog::LOG_PID | ::Syslog::LOG_CONS)
       @facility = ::Syslog::LOG_LOCAL0
+      super
     end
 
     def identity(value = nil)
