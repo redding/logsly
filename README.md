@@ -32,7 +32,7 @@ Logsly creates and delegates to a [Logging logger](https://github.com/TwP/loggin
 ## Settings
 
 * `log_type`: custom string used to identify the type of the logger
-* `level`: the level in use (default: `'debug'`)
+* `level`: the level in use (default: `'info'`)
 * `outputs`: list of named outputs to log to (default: `[]`)
 
 ## Outputs
@@ -41,8 +41,9 @@ Logsly creates and delegates to a [Logging logger](https://github.com/TwP/loggin
 
 ```ruby
 Logsly.stdout('my_stdout') do |logger|
+  level   'info' # (optional) if set, this level will be used instead of the logger's setting
   pattern '[%d %-5l] : %m\n'
-  colors  'my_colors'  # use the 'my_colors' color scheme
+  colors  'my_colors' # use the 'my_colors' color scheme
 end
 ```
 
@@ -54,6 +55,7 @@ Define a named stdout output to use with your loggers.  Pass a block to customiz
 Logsly.file('my_file') do |logger|
   path "development.log"
 
+  level   'debug' # log debug level when outputting to this file
   pattern '[%d %-5l] : %m\n'
   # don't use a color scheme
 end
@@ -69,6 +71,7 @@ Logsly.syslog('my_syslog') do |logger|
   facility Syslog::LOG_LOCAL0 # or whatever (default: `LOG_LOCAL0`)
   log_opts Syslog::LOG_PID    # or whatever (default: `(LOG_PID | LOG_CONS)`)
 
+  # no custom level set, just use the logger's setting
   pattern '%m\n'
   # don't use a color scheme
 end
