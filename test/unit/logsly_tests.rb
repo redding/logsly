@@ -107,7 +107,13 @@ module Logsly
   class LoggerTests < UnitTests
     desc "logger"
     setup do
+      # this populates the `Logsly::Logging182::LEVELS` constant
+      Logsly::Logging182.init
+
       @logger = TestLogger.new(:testy_log_logger)
+    end
+    teardown do
+      Logsly.reset
     end
     subject{ @logger }
 
@@ -134,11 +140,14 @@ module Logsly
       assert_equal [:stdout], log.outputs
     end
 
-    should "create a Logsly::Logging182::Logger for each output" do
+    should "not have any output loggers by default" do
       assert_empty subject.output_loggers
+    end
 
+    should "create a Logsly::Logging182::Logger for each output" do
       outputs = Factory.integer(3).times.map{ Factory.string }
       log = TestLogger.new(:testy_log_logger, :outputs => outputs)
+      assert_equal outputs.size, log.output_loggers.size
       outputs.each do |output|
         logger = log.output_loggers[output]
         assert_kind_of Logsly::Logging182::Logger, logger
@@ -150,6 +159,45 @@ module Logsly
         # default the level for each logger
         assert_equal Logsly::Logging182::LEVELS[DEFAULT_LEVEL], logger.level
       end
+    end
+
+    should "default a configured outputs level when creating loggers" do
+      output_name = Factory.string
+      Logsly.stdout(output_name){ } # don't set a `level`
+
+      log = TestLogger.new(:testy_log_logger, :outputs => [output_name])
+      logger = log.output_loggers[output_name]
+      assert_kind_of Logsly::Logging182::Logger, logger
+      assert_equal Logsly::Logging182::LEVELS[DEFAULT_LEVEL], logger.level
+    end
+
+    should "use the configured outputs level when creating loggers" do
+      output_name      = Factory.string
+      custom_log_level = Logsly::Logging182::LEVELS.keys.choice
+      Logsly.stdout(output_name){ level(custom_log_level) }
+
+      passed_log_level = (Logsly::Logging182::LEVELS.keys - [custom_log_level]).choice
+      log = TestLogger.new(:testy_log_logger, {
+        :level   => passed_log_level,
+        :outputs => [output_name]
+      })
+      logger = log.output_loggers[output_name]
+      assert_kind_of Logsly::Logging182::Logger, logger
+      assert_equal Logsly::Logging182::LEVELS[custom_log_level], logger.level
+    end
+
+    should "use a passed output level when creating loggers" do
+      output_name = Factory.string
+      Logsly.stdout(output_name){ } # don't set a `level`
+
+      passed_log_level = Logsly::Logging182::LEVELS.keys.choice
+      log = TestLogger.new(:testy_log_logger, {
+        :level   => passed_log_level,
+        :outputs => [output_name]
+      })
+      logger = log.output_loggers[output_name]
+      assert_kind_of Logsly::Logging182::Logger, logger
+      assert_equal Logsly::Logging182::LEVELS[passed_log_level], logger.level
     end
 
     should "set mdc key/value pairs" do

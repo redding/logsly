@@ -63,7 +63,7 @@ module Logsly
         output_data = output.data(self)
 
         # prefer output-specific level; fall back to general level
-        logger.level = output_data ? output_data.level : @level
+        logger.level = output_data && output_data.level ? output_data.level : @level
         add_appender(logger, output.to_appender(output_data))
 
         hash[output_name] = logger
