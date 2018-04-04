@@ -173,10 +173,10 @@ module Logsly
 
     should "use the configured outputs level when creating loggers" do
       output_name      = Factory.string
-      custom_log_level = Logsly::Logging182::LEVELS.keys.choice
+      custom_log_level = Logsly::Logging182::LEVELS.keys.sample
       Logsly.stdout(output_name){ level(custom_log_level) }
 
-      passed_log_level = (Logsly::Logging182::LEVELS.keys - [custom_log_level]).choice
+      passed_log_level = (Logsly::Logging182::LEVELS.keys - [custom_log_level]).sample
       log = TestLogger.new(:testy_log_logger, {
         :level   => passed_log_level,
         :outputs => [output_name]
@@ -190,7 +190,7 @@ module Logsly
       output_name = Factory.string
       Logsly.stdout(output_name){ } # don't set a `level`
 
-      passed_log_level = Logsly::Logging182::LEVELS.keys.choice
+      passed_log_level = Logsly::Logging182::LEVELS.keys.sample
       log = TestLogger.new(:testy_log_logger, {
         :level   => passed_log_level,
         :outputs => [output_name]
