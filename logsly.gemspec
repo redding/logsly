@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_development_dependency("assert", ["~> 2.16.1"])
+  gem.add_development_dependency("assert", ["~> 2.16.3"])
 
   gem.add_dependency("much-plugin",    ["~> 0.2.0"])
   # gem.add_dependency("logging",      ["~> 1.8.2"])  # now manually copied in and tweaked, see README
